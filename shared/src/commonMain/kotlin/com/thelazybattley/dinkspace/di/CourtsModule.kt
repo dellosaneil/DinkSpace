@@ -1,7 +1,9 @@
 package com.thelazybattley.dinkspace.di
 
+import com.thelazybattley.dinkspace.core.config.AppConfig
 import com.thelazybattley.dinkspace.core.data.database.DinkSpaceDatabase
 import com.thelazybattley.dinkspace.feature.courts.data.remote.CourtRemoteDataSource
+import com.thelazybattley.dinkspace.feature.courts.data.remote.FakeCourtRemoteDataSource
 import com.thelazybattley.dinkspace.feature.courts.data.remote.FirestoreCourtDataSource
 import com.thelazybattley.dinkspace.feature.courts.data.repository.OfflineFirstCourtRepository
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.CourtRepository
@@ -18,7 +20,9 @@ import org.koin.dsl.module
 
 val courtsModule = module {
     single { get<DinkSpaceDatabase>().courtDao() }
-    singleOf(::FirestoreCourtDataSource) bind CourtRemoteDataSource::class
+    single<CourtRemoteDataSource> {
+        if (AppConfig.USE_FAKE_DATA) FakeCourtRemoteDataSource() else FirestoreCourtDataSource(get())
+    }
     singleOf(::OfflineFirstCourtRepository) bind CourtRepository::class
 
     factoryOf(::SearchCourtsUseCase)

@@ -26,3 +26,14 @@ fun formatHour(hour: Int): String {
     val suffix = if (normalized < 12) "AM" else "PM"
     return "$display $suffix"
 }
+
+/** 12.0 -> "12", 12.5 -> "12.50" */
+fun formatRate(rate: Double): String {
+    val cents = kotlin.math.round(rate * 100).toLong()
+    val whole = cents / 100
+    val fraction = cents % 100
+    return if (fraction == 0L) "$whole" else "$whole.${fraction.toString().padStart(2, '0')}"
+}
+
+/** "https://m.me/venue" -> "m.me/venue" */
+fun String.withoutScheme(): String = substringAfter("://")

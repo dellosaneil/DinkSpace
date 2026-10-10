@@ -51,6 +51,8 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 import com.thelazybattley.dinkspace.feature.courts.presentation.courtSummary
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHour
+import com.thelazybattley.dinkspace.feature.courts.presentation.formatRate
+import com.thelazybattley.dinkspace.feature.courts.presentation.withoutScheme
 import dinkspace.shared.generated.resources.Res
 import dinkspace.shared.generated.resources.action_back
 import dinkspace.shared.generated.resources.court_detail_call_to_book
@@ -200,7 +202,7 @@ private fun CourtDetailContent(
                         ),
                     )
                     court.hourlyRate?.let { rate ->
-                        InfoChip(stringResource(Res.string.court_detail_rate, rate.toString()))
+                        InfoChip(stringResource(Res.string.court_detail_rate, formatRate(rate)))
                     }
                 }
             }
@@ -315,7 +317,7 @@ private fun ContactSection(
                 ContactRow(
                     icon = Res.drawable.ic_messenger,
                     label = stringResource(Res.string.court_detail_messenger),
-                    value = url,
+                    value = url.withoutScheme(),
                     onClick = { onAction(CourtDetailAction.OnMessengerClick(url)) },
                 )
             }
