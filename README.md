@@ -29,3 +29,32 @@ Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…# DinkSpace
+
+
+## Architecture
+
+Clean Architecture + MVVM, organized by feature inside `shared/src/commonMain`:
+
+```
+core/
+  domain/         Result, Error, DataError: shared by every feature
+  data/           Room database (DinkSpaceDatabase, DatabaseFactory), Firestore error mapping
+  presentation/   theme, shared composables, error → string mapping
+feature/<name>/
+  domain/         models, repository interfaces, use cases (pure Kotlin, no framework imports)
+  data/           Room entities + DAOs, Firestore data sources + DTOs, mappers, repository impls
+  presentation/   <Screen>State, <Screen>Action, <Screen>ViewModel, <Screen>Root + <Screen>Screen
+di/               Koin modules (one per feature) and initKoin()
+navigation/       type-safe routes, NavHost and bottom bar
+```
+
+- Dependencies point inwards: presentation → domain ← data. The domain layer knows nothing about Room, Firebase or Compose.
+- Repositories are offline-first: Room is the single source of truth and Firestore only refreshes it.
+- Each screen has a stateful `XRoot` that wires up the ViewModel and navigation, and a stateless `XScreen` that takes `state` and `onAction`, so it can be previewed.
+
+Stack: Firebase (GitLive Kotlin SDK: Firestore, Auth), Room KMP with the bundled SQLite driver, Koin, Navigation Compose, Coil 3 (Ktor network fetcher) for images.
+
+### Firebase setup
+
+- **Android:** put `google-services.json` in `androidApp/`. The Google Services plugin is applied automatically once the file exists.
+- **iOS:** add the Firebase iOS SDK with Swift Package Manager (FirebaseAuth and FirebaseFirestore), add `GoogleService-Info.plist`, and call `FirebaseApp.configure()` in `iOSApp.init()`.
