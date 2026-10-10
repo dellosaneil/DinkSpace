@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +64,7 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
 import com.thelazybattley.dinkspace.feature.courts.presentation.components.DateChips
+import com.thelazybattley.dinkspace.feature.courts.presentation.components.TimeRangePicker
 import com.thelazybattley.dinkspace.feature.courts.presentation.courtSummary
 import com.thelazybattley.dinkspace.feature.courts.presentation.detail.components.CollapsingCourtHeader
 import com.thelazybattley.dinkspace.feature.courts.presentation.detail.components.PhotoViewer
@@ -73,6 +75,7 @@ import com.thelazybattley.dinkspace.feature.courts.presentation.googleMapsUrl
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import com.thelazybattley.dinkspace.feature.courts.presentation.withoutScheme
 import dinkspace.shared.generated.resources.Res
+import dinkspace.shared.generated.resources.court_detail_all_open_hours
 import dinkspace.shared.generated.resources.court_detail_availability
 import dinkspace.shared.generated.resources.court_detail_call
 import dinkspace.shared.generated.resources.court_detail_call_to_book
@@ -86,7 +89,6 @@ import dinkspace.shared.generated.resources.court_detail_location
 import dinkspace.shared.generated.resources.court_detail_maps_chip
 import dinkspace.shared.generated.resources.court_detail_message
 import dinkspace.shared.generated.resources.court_detail_messenger
-import dinkspace.shared.generated.resources.court_detail_no_hours
 import dinkspace.shared.generated.resources.court_detail_no_rate
 import dinkspace.shared.generated.resources.court_detail_not_found
 import dinkspace.shared.generated.resources.court_detail_open_in_maps
@@ -449,26 +451,39 @@ private fun AvailabilitySection(
     onAction: (CourtDetailAction) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = stringResource(Res.string.court_detail_availability),
-            modifier = Modifier.padding(horizontal = 20.dp),
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(Res.string.court_detail_availability),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            val openRange = court.openRange
+            if (openRange != null && openRange != state.timeSelection.range) {
+                TextButton(onClick = { onAction(CourtDetailAction.OnShowAllOpenHours) }) {
+                    Text(stringResource(Res.string.court_detail_all_open_hours))
+                }
+            }
+        }
         DateChips(
             dates = state.dates,
             selectedDate = state.selectedDate,
             onSelect = { onAction(CourtDetailAction.OnDateSelect(it)) },
         )
+        // Narrows the table to the hours the player cares about, starting from the Courts filter.
+        TimeRangePicker(
+            selection = state.timeSelection,
+            selectedDate = state.selectedDate,
+            onHourClick = { onAction(CourtDetailAction.OnHourClick(it)) },
+        )
         Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val schedule = state.schedule
-            when {
-                court.openRange == null -> Text(
-                    text = stringResource(Res.string.court_detail_no_hours),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                schedule == null -> ScheduleTableSkeleton()
-                else -> ScheduleTable(court = court, slots = schedule, selectedDate = state.selectedDate)
+            if (schedule == null) {
+                ScheduleTableSkeleton()
+            } else {
+                ScheduleTable(court = court, slots = schedule, selectedDate = state.selectedDate)
             }
             Text(
                 text = stringResource(Res.string.court_detail_rates_note),

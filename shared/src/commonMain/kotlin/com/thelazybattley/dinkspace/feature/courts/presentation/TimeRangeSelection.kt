@@ -1,4 +1,4 @@
-package com.thelazybattley.dinkspace.feature.courts.presentation.list
+package com.thelazybattley.dinkspace.feature.courts.presentation
 
 import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange.Companion.HOURS_PER_DAY

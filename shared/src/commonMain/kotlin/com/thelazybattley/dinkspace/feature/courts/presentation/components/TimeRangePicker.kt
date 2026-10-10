@@ -1,4 +1,4 @@
-package com.thelazybattley.dinkspace.feature.courts.presentation.list.components
+package com.thelazybattley.dinkspace.feature.courts.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -28,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHour
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
-import com.thelazybattley.dinkspace.feature.courts.presentation.list.TimeRangeSelection
+import com.thelazybattley.dinkspace.feature.courts.presentation.TimeRangeSelection
 import dinkspace.shared.generated.resources.Res
 import dinkspace.shared.generated.resources.courts_time_ends_next_day
 import dinkspace.shared.generated.resources.courts_time_hint_end
@@ -49,6 +50,15 @@ fun TimeRangePicker(
         initialFirstVisibleItemIndex = (selection.range.startHour - 1).coerceAtLeast(0),
     )
     val rangeLabel = formatHourRange(selection.range.startHour, selection.range.endHour)
+
+    // Bring the start back into view when the range is changed from outside the strip.
+    LaunchedEffect(selection.range.startHour) {
+        val startIndex = selection.range.startHour
+        val visible = listState.layoutInfo.visibleItemsInfo.map { it.index }
+        if (visible.isNotEmpty() && startIndex !in visible) {
+            listState.animateScrollToItem((startIndex - 1).coerceAtLeast(0))
+        }
+    }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(

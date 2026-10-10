@@ -62,6 +62,7 @@
     <string name="court_detail_view_photo">View photo full screen</string>
     <string name="court_detail_photo_count">%1$d / %2$d</string>
     <string name="court_detail_availability">Availability &amp; rates</string>
+    <string name="court_detail_all_open_hours">All open hours</string>
     <string name="court_detail_col_time">Time</string>
     <string name="court_detail_col_free">Courts free</string>
     <string name="court_detail_col_rate">Rate</string>
@@ -70,7 +71,6 @@
     <string name="court_detail_free_none">None</string>
     <string name="court_detail_no_rate">—</string>
     <string name="court_detail_rates_note">Rates are per court, per hour. Availability is shared by the venue, so call or message to confirm your booking.</string>
-    <string name="court_detail_no_hours">This venue hasn\'t shared its opening hours.</string>
     <string name="court_setting_indoor_label">Indoor</string>
     <string name="court_setting_outdoor_label">Outdoor</string>
     <string name="price_amount">$%1$s</string>

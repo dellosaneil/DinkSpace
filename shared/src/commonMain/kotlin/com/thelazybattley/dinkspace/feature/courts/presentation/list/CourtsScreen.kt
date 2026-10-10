@@ -39,11 +39,12 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
+import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.components.DateChips
+import com.thelazybattley.dinkspace.feature.courts.presentation.components.TimeRangePicker
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtAvailabilityCard
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtListSkeleton
-import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.TimeRangePicker
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import dinkspace.shared.generated.resources.Res
 import dinkspace.shared.generated.resources.courts_count
@@ -66,7 +67,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun CourtsRoot(
-    onCourtClick: (courtId: String) -> Unit,
+    onCourtClick: (courtId: String, date: LocalDate, range: TimeRange) -> Unit,
     viewModel: CourtsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -75,7 +76,7 @@ fun CourtsRoot(
         state = state,
         onAction = { action ->
             when (action) {
-                is CourtsAction.OnCourtClick -> onCourtClick(action.courtId)
+                is CourtsAction.OnCourtClick -> onCourtClick(action.courtId, state.selectedDate, state.timeSelection.range)
                 else -> Unit
             }
             viewModel.onAction(action)

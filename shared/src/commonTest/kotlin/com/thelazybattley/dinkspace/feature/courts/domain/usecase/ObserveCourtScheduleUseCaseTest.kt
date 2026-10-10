@@ -8,6 +8,7 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 import com.thelazybattley.dinkspace.feature.courts.domain.model.DailyAvailability
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
+import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.AvailabilityRepository
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.CourtRepository
 import kotlinx.coroutines.flow.Flow
@@ -26,9 +27,10 @@ class ObserveCourtScheduleUseCaseTest {
     private val nextDay = LocalDate(2026, 10, 11)
 
     @Test
-    fun coversTheOpeningHours() = runTest {
-        val court = court(opening = 6, closing = 10)
-        val schedule = useCase(court, mapOf(date to listOf(DailyAvailability("c", date, mapOf(7 to 0))))).invoke("c", date).first()
+    fun coversTheRequestedRange() = runTest {
+        val court = court(opening = 6, closing = 22)
+        val schedule = useCase(court, mapOf(date to listOf(DailyAvailability("c", date, mapOf(7 to 0)))))
+            .invoke("c", date, TimeRange(6, 10)).first()
 
         assertEquals(listOf(6, 7, 8, 9), schedule.slots!!.map { it.startHour })
         assertEquals(SlotStatus.BOOKED, schedule.slots!![1].status)
@@ -40,7 +42,7 @@ class ObserveCourtScheduleUseCaseTest {
         val schedule = useCase(
             court,
             mapOf(date to emptyList(), nextDay to listOf(DailyAvailability("c", nextDay, mapOf(1 to 0)))),
-        ).invoke("c", date).first()
+        ).invoke("c", date, TimeRange(22, 26)).first()
 
         assertEquals(listOf(date, date, nextDay, nextDay), schedule.slots!!.map { it.date })
         assertEquals(SlotStatus.BOOKED, schedule.slots!![3].status)
@@ -49,15 +51,23 @@ class ObserveCourtScheduleUseCaseTest {
     @Test
     fun slotsAreNullUntilEveryDayLoads() = runTest {
         val court = court(opening = 22, closing = 26)
-        val schedule = useCase(court, mapOf(date to emptyList())).invoke("c", date).first()
+        val schedule = useCase(court, mapOf(date to emptyList())).invoke("c", date, TimeRange(22, 26)).first()
 
         assertEquals(court, schedule.court)
         assertNull(schedule.slots)
     }
 
     @Test
+    fun hoursOutsideOpeningAreClosed() = runTest {
+        val court = court(opening = 8, closing = 20)
+        val schedule = useCase(court, mapOf(date to emptyList())).invoke("c", date, TimeRange(6, 9)).first()
+
+        assertEquals(listOf(SlotStatus.CLOSED, SlotStatus.CLOSED, SlotStatus.OPEN), schedule.slots!!.map { it.status })
+    }
+
+    @Test
     fun missingCourtHasNoSchedule() = runTest {
-        val schedule = useCase(court = null, availability = emptyMap()).invoke("c", date).first()
+        val schedule = useCase(court = null, availability = emptyMap()).invoke("c", date, TimeRange(16, 18)).first()
 
         assertNull(schedule.court)
         assertNull(schedule.slots)

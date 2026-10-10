@@ -22,7 +22,11 @@ fun DinkSpaceNavHost(
         modifier = modifier,
     ) {
         composable<Route.Courts> {
-            CourtsRoot(onCourtClick = { courtId -> navController.navigate(Route.CourtDetail(courtId)) })
+            CourtsRoot(
+                onCourtClick = { courtId, date, range ->
+                    navController.navigate(Route.CourtDetail(courtId, date.toString(), range.startHour, range.endHour))
+                },
+            )
         }
         composable<Route.CourtDetail> {
             CourtDetailRoot(onBackClick = { navController.navigateUp() })

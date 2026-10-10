@@ -2,6 +2,7 @@ package com.thelazybattley.dinkspace.feature.courts.domain.usecase
 
 import com.thelazybattley.dinkspace.feature.courts.domain.model.Court
 import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
+import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.AvailabilityRepository
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.CourtRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -12,8 +13,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.LocalDate
 
 /**
- * One court with its hourly schedule for its opening hours on [date].
- * [slots] is null until every day the opening hours touch has been loaded.
+ * One court with its hourly schedule across a time range starting on a date.
+ * [slots] is null until every day the range touches has been loaded.
  */
 data class CourtSchedule(
     val court: Court?,
@@ -25,11 +26,10 @@ class ObserveCourtScheduleUseCase(
     private val availabilityRepository: AvailabilityRepository,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    operator fun invoke(courtId: String, date: LocalDate): Flow<CourtSchedule> =
+    operator fun invoke(courtId: String, date: LocalDate, range: TimeRange): Flow<CourtSchedule> =
         courtRepository.observeCourt(courtId).flatMapLatest { court ->
-            val range = court?.openRange
-            if (court == null || range == null) {
-                flowOf(CourtSchedule(court, slots = if (court == null) null else emptyList()))
+            if (court == null) {
+                flowOf(CourtSchedule(court = null, slots = null))
             } else {
                 val perDay = range.datesFrom(date).map { availabilityRepository.observeAvailability(it) }
                 combine(perDay) { days ->
