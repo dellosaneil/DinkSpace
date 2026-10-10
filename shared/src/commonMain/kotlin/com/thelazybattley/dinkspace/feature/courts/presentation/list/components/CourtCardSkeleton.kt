@@ -24,7 +24,7 @@ private const val SKELETON_CARDS = 4
 
 /** Shimmering stand-in for the court list while it loads. */
 @Composable
-fun CourtListSkeleton(showSlots: Boolean) {
+fun CourtListSkeleton() {
     ShimmerContainer {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -32,13 +32,13 @@ fun CourtListSkeleton(showSlots: Boolean) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             userScrollEnabled = false,
         ) {
-            items(SKELETON_CARDS) { CourtCardSkeleton(showSlots) }
+            items(SKELETON_CARDS) { CourtCardSkeleton() }
         }
     }
 }
 
 @Composable
-private fun CourtCardSkeleton(showSlots: Boolean) {
+private fun CourtCardSkeleton() {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -50,13 +50,11 @@ private fun CourtCardSkeleton(showSlots: Boolean) {
         ) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 ShimmerBlock(Modifier.fillMaxWidth(0.55f).height(18.dp))
-                if (showSlots) ShimmerBlock(Modifier.size(width = 64.dp, height = 22.dp), RoundedCornerShape(50))
+                ShimmerBlock(Modifier.size(width = 64.dp, height = 22.dp), RoundedCornerShape(50))
             }
             ShimmerBlock(Modifier.fillMaxWidth(0.45f).height(14.dp))
-            if (showSlots) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    repeat(3) { ShimmerBlock(Modifier.weight(1f).height(48.dp), RoundedCornerShape(12.dp)) }
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                repeat(3) { ShimmerBlock(Modifier.weight(1f).height(48.dp), RoundedCornerShape(12.dp)) }
             }
             ShimmerBlock(Modifier.fillMaxWidth(0.4f).height(14.dp))
         }

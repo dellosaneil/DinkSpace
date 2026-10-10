@@ -6,10 +6,10 @@ import com.thelazybattley.dinkspace.core.domain.DataError
 import com.thelazybattley.dinkspace.core.domain.DateProvider
 import com.thelazybattley.dinkspace.core.domain.onFailure
 import com.thelazybattley.dinkspace.core.presentation.toStringResource
+import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.ObserveCourtAvailabilityUseCase
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.RefreshAvailabilityUseCase
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.RefreshCourtsUseCase
-import com.thelazybattley.dinkspace.feature.courts.domain.usecase.SearchCourtsUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 
 class CourtsViewModel(
-    private val searchCourts: SearchCourtsUseCase,
     private val refreshCourts: RefreshCourtsUseCase,
     private val observeCourtAvailability: ObserveCourtAvailabilityUseCase,
     private val refreshAvailability: RefreshAvailabilityUseCase,
@@ -44,7 +43,6 @@ class CourtsViewModel(
         .onStart {
             if (!hasLoadedInitialData) {
                 hasLoadedInitialData = true
-                observeCourts()
                 observeAvailability()
                 viewModelScope.launch { refreshCourts().onFailure(::showError) }
             }
@@ -57,7 +55,6 @@ class CourtsViewModel(
 
     fun onAction(action: CourtsAction) {
         when (action) {
-            is CourtsAction.OnFilterModeChange -> _state.update { it.copy(filterMode = action.mode) }
             is CourtsAction.OnDateSelect -> _state.update { it.copy(selectedDate = action.date) }
             is CourtsAction.OnHourClick -> _state.update {
                 it.copy(timeSelection = it.timeSelection.onHourClick(action.hour))
@@ -71,21 +68,11 @@ class CourtsViewModel(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun observeCourts() {
-        _state
-            .map { it.query }
-            .distinctUntilChanged()
-            .flatMapLatest { query -> searchCourts(query) }
-            .onEach { courts -> _state.update { it.copy(courts = courts, isLoading = false) } }
-            .launchIn(viewModelScope)
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeAvailability() {
         _state
-            .map { it.selectedDate to it.timeSelection.range }
+            .map { AvailabilityQuery(it.selectedDate, it.timeSelection.range, it.query) }
             .distinctUntilChanged()
-            .flatMapLatest { (date, range) -> observeCourtAvailability(date, range) }
+            .flatMapLatest { query -> observeCourtAvailability(query.date, query.range, query.text) }
             .onEach { availability ->
                 _state.update {
                     it.copy(availability = availability.orEmpty(), isLoadingAvailability = availability == null)
@@ -128,6 +115,8 @@ class CourtsViewModel(
     private fun showError(error: DataError) {
         _state.update { it.copy(error = error.toStringResource()) }
     }
+
+    private data class AvailabilityQuery(val date: LocalDate, val range: TimeRange, val text: String)
 
     private companion object {
         const val DAYS_SHOWN = 7

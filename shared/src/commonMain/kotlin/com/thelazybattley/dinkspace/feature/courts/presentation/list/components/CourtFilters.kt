@@ -16,9 +16,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,45 +32,14 @@ import com.thelazybattley.dinkspace.feature.courts.presentation.formatHour
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortName
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
-import com.thelazybattley.dinkspace.feature.courts.presentation.list.CourtFilterMode
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.TimeRangeSelection
 import dinkspace.shared.generated.resources.Res
-import dinkspace.shared.generated.resources.courts_filter_date_time
-import dinkspace.shared.generated.resources.courts_filter_name
 import dinkspace.shared.generated.resources.courts_time_ends_next_day
 import dinkspace.shared.generated.resources.courts_time_hint_end
 import dinkspace.shared.generated.resources.courts_time_hint_start
 import dinkspace.shared.generated.resources.date_today
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
-
-@Composable
-fun FilterModeTabs(
-    selected: CourtFilterMode,
-    onSelect: (CourtFilterMode) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val modes = CourtFilterMode.entries
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        modes.forEachIndexed { index, mode ->
-            SegmentedButton(
-                selected = mode == selected,
-                onClick = { onSelect(mode) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size),
-                icon = {},
-            ) {
-                Text(
-                    stringResource(
-                        when (mode) {
-                            CourtFilterMode.DATE_TIME -> Res.string.courts_filter_date_time
-                            CourtFilterMode.NAME -> Res.string.courts_filter_name
-                        },
-                    ),
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun DateChips(

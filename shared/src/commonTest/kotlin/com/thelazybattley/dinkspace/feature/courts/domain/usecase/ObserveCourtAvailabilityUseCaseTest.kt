@@ -108,6 +108,16 @@ class ObserveCourtAvailabilityUseCaseTest {
         assertEquals(listOf(SlotStatus.OPEN, SlotStatus.OPEN, SlotStatus.CLOSED), slots.map { it.status })
     }
 
+    @Test
+    fun queryNarrowsCourtsAlongsideTheTimeRange() = runTest {
+        val useCase = useCase(availability = emptyList())
+
+        val result = useCase(date, TimeRange(16, 18), query = "night").first()!!
+
+        assertEquals(listOf("night"), result.map { it.court.id })
+        assertEquals(2, result.single().slots.size)
+    }
+
     private fun useCase(availability: List<DailyAvailability>?, courts: List<Court> = listOf(earlyBird, nightOwl)) =
         useCase(availabilityByDate = availability?.let { mapOf(date to it) }.orEmpty(), courts = courts)
 
@@ -115,11 +125,13 @@ class ObserveCourtAvailabilityUseCaseTest {
         availabilityByDate: Map<LocalDate, List<DailyAvailability>>,
         courts: List<Court> = listOf(earlyBird, nightOwl),
     ) = ObserveCourtAvailabilityUseCase(
-        courtRepository = object : CourtRepository {
-            override fun observeCourts(): Flow<List<Court>> = flowOf(courts)
-            override fun observeCourt(id: String): Flow<Court?> = flowOf(null)
-            override suspend fun refreshCourts(): EmptyResult<DataError> = Result.Success(Unit)
-        },
+        searchCourts = SearchCourtsUseCase(
+            object : CourtRepository {
+                override fun observeCourts(): Flow<List<Court>> = flowOf(courts)
+                override fun observeCourt(id: String): Flow<Court?> = flowOf(null)
+                override suspend fun refreshCourts(): EmptyResult<DataError> = Result.Success(Unit)
+            },
+        ),
         availabilityRepository = object : AvailabilityRepository {
             override fun observeAvailability(date: LocalDate) = MutableStateFlow(availabilityByDate[date])
             override suspend fun refreshAvailability(date: LocalDate): EmptyResult<DataError> = Result.Success(Unit)

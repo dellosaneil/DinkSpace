@@ -50,15 +50,6 @@ import org.jetbrains.compose.resources.stringResource
 private const val SLOT_COLUMNS = 3
 
 @Composable
-fun CourtCard(
-    court: Court,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    CourtCardFrame(court = court, onClick = onClick, modifier = modifier)
-}
-
-@Composable
 fun CourtAvailabilityCard(
     availability: CourtAvailability,
     onClick: () -> Unit,

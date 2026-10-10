@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,22 +39,28 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
+import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtAvailabilityCard
-import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtCard
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtListSkeleton
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.DateChips
-import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.FilterModeTabs
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.TimeRangePicker
+import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import dinkspace.shared.generated.resources.Res
+import dinkspace.shared.generated.resources.courts_count
 import dinkspace.shared.generated.resources.courts_empty
+import dinkspace.shared.generated.resources.courts_empty_query
 import dinkspace.shared.generated.resources.courts_search_hint
+import dinkspace.shared.generated.resources.courts_summary
+import dinkspace.shared.generated.resources.courts_summary_query
 import dinkspace.shared.generated.resources.courts_title
+import dinkspace.shared.generated.resources.date_today
 import dinkspace.shared.generated.resources.ic_search
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -103,15 +110,13 @@ fun CourtsScreen(
                 onRefresh = { onAction(CourtsAction.OnRefresh) },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                when (state.filterMode) {
-                    CourtFilterMode.DATE_TIME -> AvailabilityList(state, onAction)
-                    CourtFilterMode.NAME -> NameResultsList(state, onAction)
-                }
+                CourtResults(state, onAction)
             }
         }
     }
 }
 
+/** Name search, day and time range all apply together; the search is optional. */
 @Composable
 private fun CourtsHeader(
     state: CourtsState,
@@ -129,31 +134,10 @@ private fun CourtsHeader(
                 text = stringResource(Res.string.courts_title),
                 style = MaterialTheme.typography.headlineMedium,
             )
-            FilterModeTabs(
-                selected = state.filterMode,
-                onSelect = { onAction(CourtsAction.OnFilterModeChange(it)) },
-            )
-        }
-
-        when (state.filterMode) {
-            CourtFilterMode.DATE_TIME -> {
-                DateChips(
-                    dates = state.dates,
-                    selectedDate = state.selectedDate,
-                    onSelect = { onAction(CourtsAction.OnDateSelect(it)) },
-                )
-                TimeRangePicker(
-                    selection = state.timeSelection,
-                    selectedDate = state.selectedDate,
-                    onHourClick = { onAction(CourtsAction.OnHourClick(it)) },
-                )
-            }
-            CourtFilterMode.NAME -> OutlinedTextField(
+            OutlinedTextField(
                 value = state.query,
                 onValueChange = { onAction(CourtsAction.OnQueryChange(it)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text(stringResource(Res.string.courts_search_hint)) },
                 leadingIcon = { Icon(painterResource(Res.drawable.ic_search), contentDescription = null) },
                 singleLine = true,
@@ -161,41 +145,59 @@ private fun CourtsHeader(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             )
         }
+        DateChips(
+            dates = state.dates,
+            selectedDate = state.selectedDate,
+            onSelect = { onAction(CourtsAction.OnDateSelect(it)) },
+        )
+        TimeRangePicker(
+            selection = state.timeSelection,
+            selectedDate = state.selectedDate,
+            onHourClick = { onAction(CourtsAction.OnHourClick(it)) },
+        )
+        if (!state.isLoadingAvailability) {
+            ResultsSummary(state, Modifier.padding(horizontal = 20.dp))
+        }
     }
 }
 
+/** "2 courts · Today, 4–6 PM · “riv”" */
 @Composable
-private fun AvailabilityList(
+private fun ResultsSummary(state: CourtsState, modifier: Modifier = Modifier) {
+    val count = state.availability.size
+    val courts = pluralStringResource(Res.plurals.courts_count, count, count)
+    val day = if (state.selectedDate == state.dates.firstOrNull()) {
+        stringResource(Res.string.date_today)
+    } else {
+        state.selectedDate.shortLabel()
+    }
+    val range = state.timeSelection.range
+    val hours = formatHourRange(range.startHour, range.endHour)
+    val query = state.query.trim()
+    Text(
+        text = if (query.isEmpty()) {
+            stringResource(Res.string.courts_summary, courts, day, hours)
+        } else {
+            stringResource(Res.string.courts_summary_query, courts, day, hours, query)
+        },
+        modifier = modifier,
+        style = MaterialTheme.typography.labelLarge,
+    )
+}
+
+@Composable
+private fun CourtResults(
     state: CourtsState,
     onAction: (CourtsAction) -> Unit,
 ) {
     when {
-        state.isLoadingAvailability -> CourtListSkeleton(showSlots = true)
-        state.availability.isEmpty() -> CenteredBox { EmptyCourts() }
+        state.isLoadingAvailability -> CourtListSkeleton()
+        state.availability.isEmpty() -> CenteredBox { EmptyCourts(state.query.trim()) }
         else -> CourtList {
             items(state.availability, key = { it.court.id }) { availability ->
                 CourtAvailabilityCard(
                     availability = availability,
                     onClick = { onAction(CourtsAction.OnCourtClick(availability.court.id)) },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun NameResultsList(
-    state: CourtsState,
-    onAction: (CourtsAction) -> Unit,
-) {
-    when {
-        state.isLoading -> CourtListSkeleton(showSlots = false)
-        state.courts.isEmpty() -> CenteredBox { EmptyCourts() }
-        else -> CourtList {
-            items(state.courts, key = { it.id }) { court ->
-                CourtCard(
-                    court = court,
-                    onClick = { onAction(CourtsAction.OnCourtClick(court.id)) },
                 )
             }
         }
@@ -218,9 +220,14 @@ private fun CenteredBox(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun EmptyCourts() {
+private fun EmptyCourts(query: String) {
     Text(
-        text = stringResource(Res.string.courts_empty),
+        text = if (query.isEmpty()) {
+            stringResource(Res.string.courts_empty)
+        } else {
+            stringResource(Res.string.courts_empty_query, query)
+        },
+        textAlign = TextAlign.Center,
         modifier = Modifier.padding(32.dp),
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -250,7 +257,6 @@ private fun CourtsScreenPreview() {
             state = CourtsState(
                 dates = List(7) { today.plus(it, DateTimeUnit.DAY) },
                 selectedDate = today,
-                isLoading = false,
                 isLoadingAvailability = false,
                 availability = listOf(
                     CourtAvailability(

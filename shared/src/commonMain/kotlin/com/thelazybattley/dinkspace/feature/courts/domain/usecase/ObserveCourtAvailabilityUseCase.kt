@@ -7,7 +7,6 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
 import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.AvailabilityRepository
-import com.thelazybattley.dinkspace.feature.courts.domain.repository.CourtRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.datetime.DateTimeUnit
@@ -15,17 +14,17 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 
 /**
- * Every court with its hourly slots inside [TimeRange] starting on a date, courts with the most
- * open slots first. A range past midnight reads the next day's availability for those hours.
+ * Courts matching [query] (name or area, blank for all) with their hourly slots inside [TimeRange]
+ * starting on a date, courts with the most open slots first. A range past midnight reads the next day's availability for those hours.
  * Emits null until every day the range touches has been loaded.
  */
 class ObserveCourtAvailabilityUseCase(
-    private val courtRepository: CourtRepository,
+    private val searchCourts: SearchCourtsUseCase,
     private val availabilityRepository: AvailabilityRepository,
 ) {
-    operator fun invoke(date: LocalDate, range: TimeRange): Flow<List<CourtAvailability>?> {
+    operator fun invoke(date: LocalDate, range: TimeRange, query: String = ""): Flow<List<CourtAvailability>?> {
         val perDay = range.datesFrom(date).map { availabilityRepository.observeAvailability(it) }
-        return combine(courtRepository.observeCourts(), combine(perDay) { it.toList() }) { courts, days ->
+        return combine(searchCourts(query), combine(perDay) { it.toList() }) { courts, days ->
             if (days.any { it == null }) null else buildAvailability(courts, days.filterNotNull().flatten(), date, range)
         }
     }

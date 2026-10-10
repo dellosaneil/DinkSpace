@@ -18,15 +18,18 @@
     <string name="error_disk_full">Your device is out of storage.</string>
 
     <string name="courts_title">Find a court</string>
-    <string name="courts_search_hint">Search by name or location</string>
+    <string name="courts_search_hint">Search by name or area (optional)</string>
     <string name="courts_empty">No courts found</string>
+    <string name="courts_empty_query">No courts match “%1$s” at this time.</string>
+    <string name="courts_summary">%1$s · %2$s, %3$s</string>
+    <string name="courts_summary_query">%1$s · %2$s, %3$s · “%4$s”</string>
+    <plurals name="courts_count">
+        <item quantity="one">%1$d court</item>
+        <item quantity="other">%1$d courts</item>
+    </plurals>
     <string name="court_count">%1$d %2$s courts</string>
     <string name="court_setting_indoor">indoor</string>
     <string name="court_setting_outdoor">outdoor</string>
-    <string name="courts_filter_date_time">Date &amp; time</string>
-    <string name="courts_filter_name">Name</string>
-    <string name="courts_dates">Date</string>
-    <string name="courts_time_range">Time range</string>
     <string name="courts_time_hint_start">Tap a start, then an end</string>
     <string name="courts_time_hint_end">Now tap an end time</string>
     <string name="courts_time_ends_next_day">Ends %1$s</string>
