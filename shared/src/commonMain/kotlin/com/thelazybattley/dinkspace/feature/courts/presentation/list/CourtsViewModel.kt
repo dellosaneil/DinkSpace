@@ -56,9 +56,13 @@ class CourtsViewModel(
     fun onAction(action: CourtsAction) {
         when (action) {
             is CourtsAction.OnDateSelect -> _state.update { it.copy(selectedDate = action.date) }
-            is CourtsAction.OnHourClick -> _state.update {
-                it.copy(timeSelection = it.timeSelection.onHourClick(action.hour))
+            is CourtsAction.OnTimeFieldClick -> _state.update {
+                it.copy(timeSelection = it.timeSelection.toggle(action.field))
             }
+            is CourtsAction.OnTimeHourPick -> _state.update {
+                it.copy(timeSelection = it.timeSelection.pick(action.hour))
+            }
+            CourtsAction.OnTimePanelDismiss -> _state.update { it.copy(timeSelection = it.timeSelection.close()) }
             is CourtsAction.OnQueryChange -> _state.update { it.copy(query = action.query) }
             CourtsAction.OnRefresh -> refreshAll()
             CourtsAction.OnErrorShown -> _state.update { it.copy(error = null) }

@@ -31,8 +31,14 @@
     <string name="court_count">%1$d %2$s courts</string>
     <string name="court_setting_indoor">indoor</string>
     <string name="court_setting_outdoor">outdoor</string>
-    <string name="courts_time_hint_start">Tap a start, then an end</string>
-    <string name="courts_time_hint_end">Now tap an end time</string>
+    <string name="time_from">From</string>
+    <string name="time_to">To</string>
+    <string name="time_start_title">Start time</string>
+    <string name="time_end_title">End time</string>
+    <string name="time_start_hint">When do you want to start playing?</string>
+    <string name="time_end_hint">Hours marked “next day” end after midnight.</string>
+    <string name="time_next_day">next day</string>
+    <string name="action_done">Done</string>
     <string name="courts_time_ends_next_day">Ends %1$s</string>
     <string name="courts_open_slots">%1$d open</string>
     <string name="courts_fully_booked">Fully booked</string>

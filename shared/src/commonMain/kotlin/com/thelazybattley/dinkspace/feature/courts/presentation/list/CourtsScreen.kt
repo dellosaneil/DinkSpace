@@ -154,7 +154,9 @@ private fun CourtsHeader(
         TimeRangePicker(
             selection = state.timeSelection,
             selectedDate = state.selectedDate,
-            onHourClick = { onAction(CourtsAction.OnHourClick(it)) },
+            onFieldClick = { onAction(CourtsAction.OnTimeFieldClick(it)) },
+            onHourPick = { onAction(CourtsAction.OnTimeHourPick(it)) },
+            onDismiss = { onAction(CourtsAction.OnTimePanelDismiss) },
         )
         if (!state.isLoadingAvailability) {
             ResultsSummary(state, Modifier.padding(horizontal = 20.dp))

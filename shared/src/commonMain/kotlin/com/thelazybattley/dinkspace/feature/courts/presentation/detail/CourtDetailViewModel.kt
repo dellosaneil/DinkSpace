@@ -58,9 +58,13 @@ class CourtDetailViewModel(
     fun onAction(action: CourtDetailAction) {
         when (action) {
             is CourtDetailAction.OnDateSelect -> _state.update { it.copy(selectedDate = action.date) }
-            is CourtDetailAction.OnHourClick -> _state.update {
-                it.copy(timeSelection = it.timeSelection.onHourClick(action.hour))
+            is CourtDetailAction.OnTimeFieldClick -> _state.update {
+                it.copy(timeSelection = it.timeSelection.toggle(action.field))
             }
+            is CourtDetailAction.OnTimeHourPick -> _state.update {
+                it.copy(timeSelection = it.timeSelection.pick(action.hour))
+            }
+            CourtDetailAction.OnTimePanelDismiss -> _state.update { it.copy(timeSelection = it.timeSelection.close()) }
             CourtDetailAction.OnShowAllOpenHours -> _state.update { state ->
                 val openRange = state.court?.openRange ?: return@update state
                 state.copy(timeSelection = TimeRangeSelection(openRange))

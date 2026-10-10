@@ -476,7 +476,9 @@ private fun AvailabilitySection(
         TimeRangePicker(
             selection = state.timeSelection,
             selectedDate = state.selectedDate,
-            onHourClick = { onAction(CourtDetailAction.OnHourClick(it)) },
+            onFieldClick = { onAction(CourtDetailAction.OnTimeFieldClick(it)) },
+            onHourPick = { onAction(CourtDetailAction.OnTimeHourPick(it)) },
+            onDismiss = { onAction(CourtDetailAction.OnTimePanelDismiss) },
         )
         Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val schedule = state.schedule
