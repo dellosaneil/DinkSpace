@@ -1,8 +1,10 @@
 package com.thelazybattley.dinkspace.di
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.thelazybattley.dinkspace.core.data.SystemDateProvider
 import com.thelazybattley.dinkspace.core.data.database.DatabaseFactory
 import com.thelazybattley.dinkspace.core.data.database.DinkSpaceDatabase
+import com.thelazybattley.dinkspace.core.domain.DateProvider
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.firestore.firestore
@@ -18,6 +20,7 @@ val coreModule = module {
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()
     }
+    single<DateProvider> { SystemDateProvider() }
     single { Firebase.firestore }
     single { Firebase.auth }
 }

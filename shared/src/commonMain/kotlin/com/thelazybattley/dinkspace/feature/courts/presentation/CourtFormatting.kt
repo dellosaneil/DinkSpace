@@ -27,6 +27,15 @@ fun formatHour(hour: Int): String {
     return "$display $suffix"
 }
 
+/** (16, 18) -> "4–6 PM", (11, 13) -> "11 AM–1 PM" */
+fun formatHourRange(startHour: Int, endHour: Int): String {
+    val start = formatHour(startHour)
+    val end = formatHour(endHour)
+    val startSuffix = start.substringAfter(' ')
+    val endSuffix = end.substringAfter(' ')
+    return if (startSuffix == endSuffix) "${start.substringBefore(' ')}–$end" else "$start–$end"
+}
+
 /** 12.0 -> "12", 12.5 -> "12.50" */
 fun formatRate(rate: Double): String {
     val cents = kotlin.math.round(rate * 100).toLong()

@@ -23,6 +23,26 @@
     <string name="court_count">%1$d %2$s courts</string>
     <string name="court_setting_indoor">indoor</string>
     <string name="court_setting_outdoor">outdoor</string>
+    <string name="courts_filter_date_time">Date &amp; time</string>
+    <string name="courts_filter_name">Name</string>
+    <string name="courts_dates">Date</string>
+    <string name="courts_time_range">Time range</string>
+    <string name="courts_time_hint_start">Tap a start, then an end</string>
+    <string name="courts_time_hint_end">Now tap an end time</string>
+    <string name="courts_open_slots">%1$d open</string>
+    <string name="courts_fully_booked">Fully booked</string>
+    <string name="courts_closed">Closed</string>
+    <string name="slot_open">Open</string>
+    <string name="slot_booked">Booked</string>
+    <string name="slot_closed">Closed</string>
+    <string name="date_today">Today</string>
+    <string name="weekday_mon">Mon</string>
+    <string name="weekday_tue">Tue</string>
+    <string name="weekday_wed">Wed</string>
+    <string name="weekday_thu">Thu</string>
+    <string name="weekday_fri">Fri</string>
+    <string name="weekday_sat">Sat</string>
+    <string name="weekday_sun">Sun</string>
     <string name="court_view_details">View details &amp; contact</string>
 
     <string name="court_detail_hours">Open %1$s – %2$s</string>
