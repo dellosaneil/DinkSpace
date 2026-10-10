@@ -8,14 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
-    primary = Green700,
+    primary = Blue700,
     onPrimary = Color.White,
-    primaryContainer = Green50,
-    onPrimaryContainer = Green900,
-    secondary = Green900,
+    primaryContainer = Blue50,
+    onPrimaryContainer = Blue900,
+    secondary = Blue900,
     onSecondary = Color.White,
-    secondaryContainer = Green50,
-    onSecondaryContainer = Green900,
+    secondaryContainer = Blue50,
+    onSecondaryContainer = Blue900,
     background = Color.White,
     onBackground = Ink,
     surface = Color.White,
@@ -29,14 +29,14 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Green300,
-    onPrimary = Green900,
-    primaryContainer = Green900,
-    onPrimaryContainer = Green50,
-    secondary = Green50,
-    onSecondary = Green900,
-    secondaryContainer = Green900,
-    onSecondaryContainer = Green50,
+    primary = Blue300,
+    onPrimary = Blue900,
+    primaryContainer = Blue900,
+    onPrimaryContainer = Blue50,
+    secondary = Blue50,
+    onSecondary = Blue900,
+    secondaryContainer = Blue900,
+    onSecondaryContainer = Blue50,
     background = NightBackground,
     onBackground = NightOnSurface,
     surface = NightBackground,
