@@ -1,11 +1,11 @@
 import SwiftUI
 import Shared
+import FirebaseCore
 
 @main
 struct iOSApp: App {
     init() {
-        // TODO: Add the Firebase iOS SDK (Swift Package Manager), GoogleService-Info.plist,
-        // then `import FirebaseCore` and call `FirebaseApp.configure()` here.
+        FirebaseApp.configure()
         KoinIosKt.startKoin()
     }
 

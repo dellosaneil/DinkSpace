@@ -19,6 +19,7 @@
     <string name="error_disk_full">Your device is out of storage.</string>
 
     <string name="courts_title">Find a court</string>
+    <string name="courts_show_filters">Show filters</string>
     <string name="courts_search_hint">Search by name or area (optional)</string>
     <string name="courts_empty">No courts found</string>
     <string name="courts_empty_query">No courts match “%1$s” at this time.</string>

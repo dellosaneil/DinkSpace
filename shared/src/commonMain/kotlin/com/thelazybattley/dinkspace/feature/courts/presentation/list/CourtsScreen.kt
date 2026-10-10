@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +45,7 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.components.DateChips
 import com.thelazybattley.dinkspace.feature.courts.presentation.components.TimeRangePicker
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
+import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CollapsingCourtsHeader
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtAvailabilityCard
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtListSkeleton
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
@@ -90,6 +93,7 @@ fun CourtsScreen(
     state: CourtsState,
     onAction: (CourtsAction) -> Unit,
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.error) {
@@ -104,14 +108,24 @@ fun CourtsScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            CourtsHeader(state = state, onAction = onAction)
+            CollapsingCourtsHeader(
+                title = stringResource(Res.string.courts_title),
+                scrollBehavior = scrollBehavior,
+                filters = { CourtsFilters(state = state, onAction = onAction) },
+                summary = {
+                    if (!state.isLoadingAvailability) ResultsSummary(state)
+                },
+            )
 
             PullToRefreshBox(
                 isRefreshing = state.isRefreshing,
                 onRefresh = { onAction(CourtsAction.OnRefresh) },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                CourtResults(state, onAction)
+                // Inside the refresh box so pulling down re-expands the header before it refreshes.
+                Box(modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)) {
+                    CourtResults(state, onAction)
+                }
             }
         }
     }
@@ -119,33 +133,21 @@ fun CourtsScreen(
 
 /** Name search, day and time range all apply together; the search is optional. */
 @Composable
-private fun CourtsHeader(
+private fun CourtsFilters(
     state: CourtsState,
     onAction: (CourtsAction) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.padding(top = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.courts_title),
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            OutlinedTextField(
-                value = state.query,
-                onValueChange = { onAction(CourtsAction.OnQueryChange(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(Res.string.courts_search_hint)) },
-                leadingIcon = { Icon(painterResource(Res.drawable.ic_search), contentDescription = null) },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            )
-        }
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        OutlinedTextField(
+            value = state.query,
+            onValueChange = { onAction(CourtsAction.OnQueryChange(it)) },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+            placeholder = { Text(stringResource(Res.string.courts_search_hint)) },
+            leadingIcon = { Icon(painterResource(Res.drawable.ic_search), contentDescription = null) },
+            singleLine = true,
+            shape = RoundedCornerShape(14.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        )
         DateChips(
             dates = state.dates,
             selectedDate = state.selectedDate,
@@ -158,9 +160,6 @@ private fun CourtsHeader(
             onHourPick = { onAction(CourtsAction.OnTimeHourPick(it)) },
             onDismiss = { onAction(CourtsAction.OnTimePanelDismiss) },
         )
-        if (!state.isLoadingAvailability) {
-            ResultsSummary(state, Modifier.padding(horizontal = 20.dp))
-        }
     }
 }
 
