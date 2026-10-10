@@ -10,7 +10,7 @@ import com.thelazybattley.dinkspace.feature.courts.data.local.CourtEntity
 
 @Database(
     entities = [CourtEntity::class],
-    version = 1,
+    version = 2,
 )
 @TypeConverters(StringListConverter::class)
 @ConstructedBy(DinkSpaceDatabaseConstructor::class)

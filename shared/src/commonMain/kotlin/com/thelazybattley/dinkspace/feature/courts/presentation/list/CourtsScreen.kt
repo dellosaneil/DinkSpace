@@ -39,10 +39,10 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
+import com.thelazybattley.dinkspace.feature.courts.presentation.components.DateChips
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtAvailabilityCard
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtListSkeleton
-import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.DateChips
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.TimeRangePicker
 import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import dinkspace.shared.generated.resources.Res
@@ -247,10 +247,10 @@ private fun CourtsScreenPreview() {
         setting = CourtSetting.OUTDOOR,
         openingHour = 6,
         closingHour = 22,
-        contact = CourtContact("+1 (555) 014-2290", null, null),
+        contact = CourtContact(phoneNumber = "+1 (555) 014-2290", messengerUrl = null),
         logoUrl = null,
         photoUrls = emptyList(),
-        hourlyRate = null,
+        rates = null,
     )
     DinkSpaceTheme {
         CourtsScreen(

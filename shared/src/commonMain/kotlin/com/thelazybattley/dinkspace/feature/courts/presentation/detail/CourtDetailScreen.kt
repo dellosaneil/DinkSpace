@@ -1,23 +1,23 @@
 package com.thelazybattley.dinkspace.feature.courts.presentation.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -25,53 +25,94 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import coil3.compose.SubcomposeAsyncImage
 import com.thelazybattley.dinkspace.core.presentation.theme.DinkSpaceTheme
 import com.thelazybattley.dinkspace.feature.courts.domain.model.Court
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
+import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtRates
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
+import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
+import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
+import com.thelazybattley.dinkspace.feature.courts.presentation.components.DateChips
 import com.thelazybattley.dinkspace.feature.courts.presentation.courtSummary
+import com.thelazybattley.dinkspace.feature.courts.presentation.detail.components.CollapsingCourtHeader
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHour
+import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatRate
+import com.thelazybattley.dinkspace.feature.courts.presentation.googleMapsUrl
+import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import com.thelazybattley.dinkspace.feature.courts.presentation.withoutScheme
 import dinkspace.shared.generated.resources.Res
-import dinkspace.shared.generated.resources.action_back
+import dinkspace.shared.generated.resources.court_detail_availability
+import dinkspace.shared.generated.resources.court_detail_call
 import dinkspace.shared.generated.resources.court_detail_call_to_book
-import dinkspace.shared.generated.resources.court_detail_contact
-import dinkspace.shared.generated.resources.court_detail_email
-import dinkspace.shared.generated.resources.court_detail_hours
+import dinkspace.shared.generated.resources.court_detail_col_free
+import dinkspace.shared.generated.resources.court_detail_col_rate
+import dinkspace.shared.generated.resources.court_detail_col_status
+import dinkspace.shared.generated.resources.court_detail_col_time
+import dinkspace.shared.generated.resources.court_detail_free_none
+import dinkspace.shared.generated.resources.court_detail_free_of
+import dinkspace.shared.generated.resources.court_detail_location
+import dinkspace.shared.generated.resources.court_detail_maps_chip
+import dinkspace.shared.generated.resources.court_detail_message
 import dinkspace.shared.generated.resources.court_detail_messenger
+import dinkspace.shared.generated.resources.court_detail_no_hours
+import dinkspace.shared.generated.resources.court_detail_no_rate
 import dinkspace.shared.generated.resources.court_detail_not_found
+import dinkspace.shared.generated.resources.court_detail_open_in_maps
+import dinkspace.shared.generated.resources.court_detail_open_range
 import dinkspace.shared.generated.resources.court_detail_phone
-import dinkspace.shared.generated.resources.court_detail_photos
-import dinkspace.shared.generated.resources.court_detail_rate
-import dinkspace.shared.generated.resources.ic_back
+import dinkspace.shared.generated.resources.court_detail_photo_count
+import dinkspace.shared.generated.resources.court_detail_rates_note
+import dinkspace.shared.generated.resources.court_setting_indoor_label
+import dinkspace.shared.generated.resources.court_setting_outdoor_label
 import dinkspace.shared.generated.resources.ic_call
-import dinkspace.shared.generated.resources.ic_email
+import dinkspace.shared.generated.resources.ic_clock
+import dinkspace.shared.generated.resources.ic_court_grid
+import dinkspace.shared.generated.resources.ic_courts
 import dinkspace.shared.generated.resources.ic_messenger
+import dinkspace.shared.generated.resources.price_amount
+import dinkspace.shared.generated.resources.slot_booked
+import dinkspace.shared.generated.resources.slot_closed
+import dinkspace.shared.generated.resources.slot_open
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+
+private const val MAX_THUMBNAILS = 5
 
 @Composable
 fun CourtDetailRoot(
@@ -87,9 +128,11 @@ fun CourtDetailRoot(
             when (action) {
                 CourtDetailAction.OnBackClick -> onBackClick()
                 is CourtDetailAction.OnCallClick -> uriHandler.openUri("tel:${action.phoneNumber}")
-                is CourtDetailAction.OnEmailClick -> uriHandler.openUri("mailto:${action.email}")
                 is CourtDetailAction.OnMessengerClick -> uriHandler.openUri(action.url.withScheme())
+                is CourtDetailAction.OnOpenMapsClick -> uriHandler.openUri(action.url)
+                else -> Unit
             }
+            viewModel.onAction(action)
         },
     )
 }
@@ -102,47 +145,35 @@ fun CourtDetailScreen(
     state: CourtDetailState,
     onAction: (CourtDetailAction) -> Unit,
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val court = state.court
+
+    LaunchedEffect(state.error) {
+        val error = state.error ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(getString(error))
+        onAction(CourtDetailAction.OnErrorShown)
+    }
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = { onAction(CourtDetailAction.OnBackClick) }) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_back),
-                            contentDescription = stringResource(Res.string.action_back),
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
+            CollapsingCourtHeader(
+                name = court?.name ?: if (state.isLoading) null else "",
+                subtitle = court?.let { "${it.area} · ${stringResource(it.setting.label())}" }.orEmpty(),
+                logoUrl = court?.logoUrl,
+                scrollBehavior = scrollBehavior,
+                onBackClick = { onAction(CourtDetailAction.OnBackClick) },
             )
         },
-        bottomBar = {
-            state.court?.let { court ->
-                Surface(shadowElevation = 8.dp) {
-                    Button(
-                        onClick = { onAction(CourtDetailAction.OnCallClick(court.contact.phoneNumber)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .padding(horizontal = 20.dp, vertical = 12.dp)
-                            .height(52.dp),
-                        shape = RoundedCornerShape(16.dp),
-                    ) {
-                        Text(stringResource(Res.string.court_detail_call_to_book))
-                    }
-                }
-            }
-        },
+        bottomBar = { court?.let { BookingBar(it.contact, onAction) } },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            val court = state.court
             when {
                 state.isLoading -> CourtDetailSkeleton()
                 court == null -> Text(
@@ -151,7 +182,7 @@ fun CourtDetailScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
-                else -> CourtDetailContent(court = court, onAction = onAction)
+                else -> CourtDetailContent(court = court, state = state, onAction = onAction)
             }
         }
     }
@@ -160,229 +191,434 @@ fun CourtDetailScreen(
 @Composable
 private fun CourtDetailContent(
     court: Court,
+    state: CourtDetailState,
     onAction: (CourtDetailAction) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .padding(top = 8.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(22.dp),
     ) {
+        // Availability sits right under the header so it shows without scrolling.
+        QuickFacts(court = court, onAction = onAction, modifier = Modifier.padding(horizontal = 20.dp))
+        AvailabilitySection(court = court, state = state, onAction = onAction)
+        if (court.photoUrls.isNotEmpty()) {
+            CourtPhotos(
+                photoUrls = court.photoUrls,
+                courtName = court.name,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
+        ContactCard(court = court, onAction = onAction, modifier = Modifier.padding(horizontal = 20.dp))
+    }
+}
+
+@Composable
+private fun CourtPhotos(
+    photoUrls: List<String>,
+    courtName: String,
+    modifier: Modifier = Modifier,
+) {
+    var selected by rememberSaveable { mutableIntStateOf(0) }
+    val index = selected.coerceIn(0, photoUrls.lastIndex)
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(start = 20.dp, bottom = 20.dp),
+                .height(196.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
-            VenueLogo(name = court.name, logoUrl = court.logoUrl)
-        }
-
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = court.name, style = MaterialTheme.typography.headlineSmall)
-                Text(
-                    text = court.address,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                FlowRow(
-                    modifier = Modifier.padding(top = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    InfoChip(court.courtSummary())
-                    InfoChip(
-                        stringResource(
-                            Res.string.court_detail_hours,
-                            formatHour(court.openingHour),
-                            formatHour(court.closingHour),
-                        ),
-                    )
-                    court.hourlyRate?.let { rate ->
-                        InfoChip(stringResource(Res.string.court_detail_rate, formatRate(rate)))
-                    }
-                }
-            }
-
-            if (court.photoUrls.isNotEmpty()) {
-                PhotoGallery(photoUrls = court.photoUrls)
-            }
-
-            ContactSection(contact = court.contact, onAction = onAction)
-        }
-    }
-}
-
-/** Shows the venue logo, falling back to the venue's initials while loading, on error or when there is none. */
-@Composable
-private fun VenueLogo(
-    name: String,
-    logoUrl: String?,
-) {
-    val shape = RoundedCornerShape(24.dp)
-    Box(
-        modifier = Modifier
-            .size(96.dp)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outline, shape),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (logoUrl == null) {
-            LogoInitials(name)
-        } else {
-            SubcomposeAsyncImage(
-                model = logoUrl,
-                contentDescription = name,
+            AsyncImage(
+                model = photoUrls[index],
+                contentDescription = courtName,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                loading = { LogoInitials(name) },
-                error = { LogoInitials(name) },
             )
+            if (photoUrls.size > 1) {
+                Text(
+                    text = stringResource(Res.string.court_detail_photo_count, index + 1, photoUrls.size),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp)
+                        .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 3.dp),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White,
+                )
+            }
+        }
+        if (photoUrls.size > 1) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                photoUrls.take(MAX_THUMBNAILS).forEachIndexed { i, url ->
+                    val isSelected = i == index
+                    AsyncImage(
+                        model = url,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .border(
+                                width = 2.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = RoundedCornerShape(10.dp),
+                            )
+                            .alpha(if (isSelected) 1f else 0.75f)
+                            .clickable { selected = i },
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+            }
         }
     }
 }
 
+/** Number of courts, opening hours and a Maps shortcut, shown above the availability. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LogoInitials(name: String) {
-    val initials = name.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = initials,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
+private fun QuickFacts(
+    court: Court,
+    onAction: (CourtDetailAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        FactChip(icon = Res.drawable.ic_court_grid, text = court.courtSummary())
+        FactChip(
+            icon = Res.drawable.ic_clock,
+            text = stringResource(Res.string.court_detail_open_range, formatHour(court.openingHour), formatHour(court.closingHour)),
+        )
+        val mapsUrl = court.googleMapsUrl()
+        FactChip(
+            icon = Res.drawable.ic_courts,
+            text = stringResource(Res.string.court_detail_maps_chip),
+            outlined = true,
+            onClick = { onAction(CourtDetailAction.OnOpenMapsClick(mapsUrl)) },
         )
     }
 }
 
 @Composable
-private fun InfoChip(text: String) {
-    Text(
-        text = text,
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(50))
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
-    )
-}
-
-@Composable
-private fun PhotoGallery(photoUrls: List<String>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionTitle(stringResource(Res.string.court_detail_photos))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(end = 20.dp),
-        ) {
-            items(photoUrls) { url ->
-                AsyncImage(
-                    model = url,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(160.dp)
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentScale = ContentScale.Crop,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ContactSection(
-    contact: CourtContact,
-    onAction: (CourtDetailAction) -> Unit,
+private fun FactChip(
+    icon: DrawableResource,
+    text: String,
+    outlined: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionTitle(stringResource(Res.string.court_detail_contact))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp)),
-        ) {
-            ContactRow(
-                icon = Res.drawable.ic_call,
-                label = stringResource(Res.string.court_detail_phone),
-                value = contact.phoneNumber,
-                onClick = { onAction(CourtDetailAction.OnCallClick(contact.phoneNumber)) },
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(50)
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .clip(shape)
+            .then(
+                if (outlined) Modifier.border(1.dp, colors.outline, shape) else Modifier.background(colors.primaryContainer),
             )
-            contact.messengerUrl?.let { url ->
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                ContactRow(
-                    icon = Res.drawable.ic_messenger,
-                    label = stringResource(Res.string.court_detail_messenger),
-                    value = url.withoutScheme(),
-                    onClick = { onAction(CourtDetailAction.OnMessengerClick(url)) },
-                )
-            }
-            contact.email?.let { email ->
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                ContactRow(
-                    icon = Res.drawable.ic_email,
-                    label = stringResource(Res.string.court_detail_email),
-                    value = email,
-                    onClick = { onAction(CourtDetailAction.OnEmailClick(email)) },
-                )
-            }
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        val content = if (outlined) colors.primary else colors.onPrimaryContainer
+        Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(14.dp), tint = content)
+        Text(text = text, style = MaterialTheme.typography.labelLarge, color = content)
+    }
+}
+
+@Composable
+private fun ContactCard(
+    court: Court,
+    onAction: (CourtDetailAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(1.dp, MaterialTheme.colorScheme.outline, shape),
+    ) {
+        val mapsUrl = court.googleMapsUrl()
+        DetailRow(
+            icon = Res.drawable.ic_courts,
+            label = stringResource(Res.string.court_detail_location),
+            value = court.address,
+        ) {
+            // Shown under the address.
+            Text(
+                text = stringResource(Res.string.court_detail_open_in_maps),
+                modifier = Modifier.clickable { onAction(CourtDetailAction.OnOpenMapsClick(mapsUrl)) },
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        RowDivider()
+        DetailRow(
+            icon = Res.drawable.ic_call,
+            label = stringResource(Res.string.court_detail_phone),
+            value = court.contact.phoneNumber,
+            trailing = {
+                Button(onClick = { onAction(CourtDetailAction.OnCallClick(court.contact.phoneNumber)) }, shape = RoundedCornerShape(10.dp)) {
+                    Text(stringResource(Res.string.court_detail_call))
+                }
+            },
+        )
+        court.contact.messengerUrl?.let { url ->
+            RowDivider()
+            DetailRow(
+                icon = Res.drawable.ic_messenger,
+                label = stringResource(Res.string.court_detail_messenger),
+                value = url.withoutScheme(),
+                trailing = {
+                    OutlinedButton(
+                        onClick = { onAction(CourtDetailAction.OnMessengerClick(url)) },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    ) {
+                        Text(stringResource(Res.string.court_detail_message))
+                    }
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun ContactRow(
+private fun DetailRow(
     icon: DrawableResource,
     label: String,
     value: String,
-    onClick: () -> Unit,
+    trailing: (@Composable RowScope.() -> Unit)? = null,
+    below: (@Composable () -> Unit)? = null,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)),
+                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
+            Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
         }
-        Column {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(text = label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = value, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            below?.invoke()
+        }
+        trailing?.invoke(this)
+    }
+}
+
+@Composable
+private fun RowDivider() {
+    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+}
+
+@Composable
+private fun AvailabilitySection(
+    court: Court,
+    state: CourtDetailState,
+    onAction: (CourtDetailAction) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = stringResource(Res.string.court_detail_availability),
+            modifier = Modifier.padding(horizontal = 20.dp),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        DateChips(
+            dates = state.dates,
+            selectedDate = state.selectedDate,
+            onSelect = { onAction(CourtDetailAction.OnDateSelect(it)) },
+        )
+        Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            val schedule = state.schedule
+            when {
+                court.openRange == null -> Text(
+                    text = stringResource(Res.string.court_detail_no_hours),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                schedule == null -> ScheduleTableSkeleton()
+                else -> ScheduleTable(court = court, slots = schedule, selectedDate = state.selectedDate)
+            }
             Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
+                text = stringResource(Res.string.court_detail_rates_note),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(text = value, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
 
 @Composable
-private fun SectionTitle(text: String) {
-    Text(text = text, style = MaterialTheme.typography.titleMedium)
+private fun ScheduleTable(
+    court: Court,
+    slots: List<HourSlot>,
+    selectedDate: LocalDate,
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(1.dp, MaterialTheme.colorScheme.outline, shape),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+        ) {
+            HeaderCell(stringResource(Res.string.court_detail_col_time), TIME_WEIGHT)
+            HeaderCell(stringResource(Res.string.court_detail_col_free), FREE_WEIGHT)
+            HeaderCell(stringResource(Res.string.court_detail_col_rate), RATE_WEIGHT, TextAlign.End)
+            HeaderCell(stringResource(Res.string.court_detail_col_status), STATUS_WEIGHT, TextAlign.End)
+        }
+        slots.forEach { slot ->
+            RowDivider()
+            ScheduleRow(court, slot, isNextDay = slot.date != selectedDate)
+        }
+    }
 }
+
+@Composable
+private fun RowScope.HeaderCell(text: String, weight: Float, align: TextAlign = TextAlign.Start) {
+    Text(
+        text = text.uppercase(),
+        modifier = Modifier.weight(weight),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = align,
+    )
+}
+
+@Composable
+private fun ScheduleRow(court: Court, slot: HourSlot, isNextDay: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    val muted = slot.status != SlotStatus.OPEN
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(TIME_WEIGHT)) {
+            Text(text = formatHourRange(slot.startHour, slot.startHour + 1), style = MaterialTheme.typography.labelLarge)
+            if (isNextDay) {
+                Text(text = slot.date.shortLabel(), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+            }
+        }
+        Text(
+            text = when (slot.status) {
+                SlotStatus.OPEN -> stringResource(Res.string.court_detail_free_of, slot.freeCourts, court.courtCount)
+                SlotStatus.BOOKED -> stringResource(Res.string.court_detail_free_none)
+                SlotStatus.CLOSED -> stringResource(Res.string.slot_closed)
+            },
+            modifier = Modifier.weight(FREE_WEIGHT),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant,
+        )
+        Text(
+            text = court.rates?.let { stringResource(Res.string.price_amount, formatRate(it.rateAt(slot.startHour))) }
+                ?: stringResource(Res.string.court_detail_no_rate),
+            modifier = Modifier.weight(RATE_WEIGHT),
+            style = MaterialTheme.typography.labelLarge,
+            color = if (muted) colors.onSurfaceVariant else colors.onSurface,
+            textAlign = TextAlign.End,
+        )
+        Box(modifier = Modifier.weight(STATUS_WEIGHT), contentAlignment = Alignment.CenterEnd) {
+            StatusPill(slot.status)
+        }
+    }
+}
+
+@Composable
+private fun StatusPill(status: SlotStatus) {
+    val colors = MaterialTheme.colorScheme
+    val (text, container, content) = when (status) {
+        SlotStatus.OPEN -> Triple(stringResource(Res.string.slot_open), colors.primaryContainer, colors.onPrimaryContainer)
+        SlotStatus.BOOKED -> Triple(stringResource(Res.string.slot_booked), colors.surfaceVariant, colors.onSurfaceVariant)
+        SlotStatus.CLOSED -> Triple(stringResource(Res.string.slot_closed), colors.surfaceVariant, colors.onSurfaceVariant)
+    }
+    Text(
+        text = text,
+        modifier = Modifier
+            .background(container, RoundedCornerShape(6.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        style = MaterialTheme.typography.labelMedium,
+        color = content,
+    )
+}
+
+@Composable
+private fun BookingBar(
+    contact: CourtContact,
+    onAction: (CourtDetailAction) -> Unit,
+) {
+    Surface(shadowElevation = 8.dp) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Button(
+                onClick = { onAction(CourtDetailAction.OnCallClick(contact.phoneNumber)) },
+                modifier = Modifier.weight(1f).height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Icon(painterResource(Res.drawable.ic_call), contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(stringResource(Res.string.court_detail_call_to_book), modifier = Modifier.padding(start = 8.dp))
+            }
+            contact.messengerUrl?.let { url ->
+                OutlinedButton(
+                    onClick = { onAction(CourtDetailAction.OnMessengerClick(url)) },
+                    modifier = Modifier.size(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    contentPadding = PaddingValues(0.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_messenger),
+                        contentDescription = stringResource(Res.string.court_detail_messenger),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun CourtSetting.label() = when (this) {
+    CourtSetting.INDOOR -> Res.string.court_setting_indoor_label
+    CourtSetting.OUTDOOR -> Res.string.court_setting_outdoor_label
+}
+
+private const val TIME_WEIGHT = 1.35f
+private const val FREE_WEIGHT = 1f
+private const val RATE_WEIGHT = 0.7f
+private const val STATUS_WEIGHT = 0.95f
 
 @Preview
 @Composable
 private fun CourtDetailScreenPreview() {
+    val today = LocalDate(2026, 10, 10)
     DinkSpaceTheme {
         CourtDetailScreen(
             state = CourtDetailState(
+                dates = List(7) { today.plus(it, DateTimeUnit.DAY) },
+                selectedDate = today,
                 isLoading = false,
                 court = Court(
                     id = "1",
@@ -393,15 +629,12 @@ private fun CourtDetailScreenPreview() {
                     setting = CourtSetting.OUTDOOR,
                     openingHour = 6,
                     closingHour = 22,
-                    contact = CourtContact(
-                        phoneNumber = "+1 (555) 014-2290",
-                        messengerUrl = "m.me/riversidepickleball",
-                        email = "bookings@riversidecourts.example",
-                    ),
+                    contact = CourtContact(phoneNumber = "+1 (555) 014-2290", messengerUrl = "https://m.me/riversidepickleball"),
                     logoUrl = null,
                     photoUrls = listOf("a", "b", "c"),
-                    hourlyRate = null,
+                    rates = CourtRates(standardRate = 10.0, peakRate = 14.0, peakStartHour = 17, peakEndHour = 22),
                 ),
+                schedule = (16 until 20).map { HourSlot(today, it, if (it == 17) SlotStatus.BOOKED else SlotStatus.OPEN, freeCourts = 3) },
             ),
             onAction = {},
         )

@@ -3,15 +3,11 @@ package com.thelazybattley.dinkspace.feature.courts.domain.usecase
 import com.thelazybattley.dinkspace.feature.courts.domain.model.Court
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtAvailability
 import com.thelazybattley.dinkspace.feature.courts.domain.model.DailyAvailability
-import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
-import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
 import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.AvailabilityRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
 
 /**
  * Courts matching [query] (name or area, blank for all) with their hourly slots inside [TimeRange]
@@ -34,30 +30,8 @@ class ObserveCourtAvailabilityUseCase(
         availability: List<DailyAvailability>,
         startDate: LocalDate,
         range: TimeRange,
-    ): List<CourtAvailability> {
-        val byCourtAndDate = availability.associateBy { it.courtId to it.date }
-        val nextDate = startDate.plus(1, DateTimeUnit.DAY)
-        return courts
-            .map { court ->
-                CourtAvailability(
-                    court = court,
-                    slots = range.hours.map { hour ->
-                        val date = if (hour >= TimeRange.HOURS_PER_DAY) nextDate else startDate
-                        val hourOfDay = hour % TimeRange.HOURS_PER_DAY
-                        val freeByHour = byCourtAndDate[court.id to date]?.freeCourtsByHour.orEmpty()
-                        slotFor(court, date, hourOfDay, freeByHour)
-                    },
-                )
-            }
+    ): List<CourtAvailability> =
+        courts
+            .map { court -> CourtAvailability(court, court.slotsFor(startDate, range, availability)) }
             .sortedWith(compareByDescending<CourtAvailability> { it.openSlotCount }.thenBy { it.court.name })
-    }
-
-    private fun slotFor(court: Court, date: LocalDate, hourOfDay: Int, freeByHour: Map<Int, Int>): HourSlot {
-        if (!court.isOpenAt(hourOfDay)) {
-            return HourSlot(date, hourOfDay, SlotStatus.CLOSED, freeCourts = 0)
-        }
-        // A missing hour means nothing is booked yet.
-        val free = (freeByHour[hourOfDay] ?: court.courtCount).coerceIn(0, court.courtCount)
-        return HourSlot(date, hourOfDay, if (free > 0) SlotStatus.OPEN else SlotStatus.BOOKED, free)
-    }
 }

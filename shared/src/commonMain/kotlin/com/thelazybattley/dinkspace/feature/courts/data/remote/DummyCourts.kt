@@ -2,7 +2,7 @@ package com.thelazybattley.dinkspace.feature.courts.data.remote
 
 /**
  * Sample courts for development. They cover the optional fields on purpose:
- * some venues have no Messenger, email, logo, photos or rate.
+ * some venues have no Messenger, logo, photos or rates, and some charge peak rates.
  */
 object DummyCourts {
 
@@ -23,10 +23,12 @@ object DummyCourts {
             closingHour = 22,
             phoneNumber = "+1 (555) 014-2290",
             messengerUrl = "https://m.me/riversidepickleball",
-            email = "bookings@riversidecourts.example",
             logoUrl = logo("riverside"),
             photoUrls = photos("riverside", 4),
-            hourlyRate = 12.0,
+            standardRate = 10.0,
+            peakRate = 14.0,
+            peakStartHour = 17,
+            peakEndHour = 22,
         ),
         CourtDto(
             id = "northgate-rec",
@@ -38,10 +40,9 @@ object DummyCourts {
             openingHour = 7,
             closingHour = 21,
             phoneNumber = "+1 (555) 013-8841",
-            email = "frontdesk@northgaterec.example",
             logoUrl = logo("northgate"),
             photoUrls = photos("northgate", 3),
-            hourlyRate = 18.0,
+            standardRate = 18.0,
         ),
         CourtDto(
             id = "elm-street",
@@ -66,10 +67,12 @@ object DummyCourts {
             closingHour = 22,
             phoneNumber = "+1 (555) 012-9076",
             messengerUrl = "https://m.me/westfieldsportsclub",
-            email = "courts@westfieldsc.example",
             logoUrl = logo("westfield"),
             photoUrls = photos("westfield", 6),
-            hourlyRate = 25.0,
+            standardRate = 20.0,
+            peakRate = 25.0,
+            peakStartHour = 18,
+            peakEndHour = 22,
         ),
         CourtDto(
             id = "harbor-view",
@@ -82,6 +85,7 @@ object DummyCourts {
             closingHour = 20,
             phoneNumber = "+1 (555) 019-4415",
             logoUrl = logo("harbor"),
+            standardRate = 8.0,
         ),
         CourtDto(
             id = "summit-athletic",
@@ -94,9 +98,8 @@ object DummyCourts {
             // Open past midnight, until 2 AM.
             closingHour = 26,
             phoneNumber = "+1 (555) 016-2087",
-            email = "play@summitathletic.example",
             photoUrls = photos("summit", 2),
-            hourlyRate = 20.0,
+            standardRate = 15.0,
         ),
         CourtDto(
             id = "maple-grove",

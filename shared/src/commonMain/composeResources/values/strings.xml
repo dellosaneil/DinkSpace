@@ -49,13 +49,29 @@
     <string name="weekday_sun">Sun</string>
     <string name="court_view_details">View details &amp; contact</string>
 
-    <string name="court_detail_hours">Open %1$s – %2$s</string>
-    <string name="court_detail_rate">%1$s / hour</string>
-    <string name="court_detail_photos">Photos from the venue</string>
-    <string name="court_detail_contact">Contact to book</string>
     <string name="court_detail_phone">Phone</string>
     <string name="court_detail_messenger">Messenger</string>
-    <string name="court_detail_email">Email</string>
+    <string name="court_detail_title">Court details</string>
+    <string name="court_detail_location">Location</string>
+    <string name="court_detail_open_in_maps">Open in Google Maps ↗</string>
+    <string name="court_detail_open_range">Open %1$s – %2$s</string>
+    <string name="court_detail_maps_chip">Maps ↗</string>
+    <string name="court_detail_call">Call</string>
+    <string name="court_detail_message">Message</string>
+    <string name="court_detail_photo_count">%1$d / %2$d</string>
+    <string name="court_detail_availability">Availability &amp; rates</string>
+    <string name="court_detail_col_time">Time</string>
+    <string name="court_detail_col_free">Courts free</string>
+    <string name="court_detail_col_rate">Rate</string>
+    <string name="court_detail_col_status">Status</string>
+    <string name="court_detail_free_of">%1$d of %2$d</string>
+    <string name="court_detail_free_none">None</string>
+    <string name="court_detail_no_rate">—</string>
+    <string name="court_detail_rates_note">Rates are per court, per hour. Availability is shared by the venue, so call or message to confirm your booking.</string>
+    <string name="court_detail_no_hours">This venue hasn\'t shared its opening hours.</string>
+    <string name="court_setting_indoor_label">Indoor</string>
+    <string name="court_setting_outdoor_label">Outdoor</string>
+    <string name="price_amount">$%1$s</string>
     <string name="court_detail_call_to_book">Call to book</string>
     <string name="court_detail_not_found">This court is no longer listed.</string>
 </resources>

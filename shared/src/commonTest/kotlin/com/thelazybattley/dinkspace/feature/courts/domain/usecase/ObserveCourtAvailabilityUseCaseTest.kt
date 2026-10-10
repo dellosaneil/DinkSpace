@@ -147,9 +147,9 @@ class ObserveCourtAvailabilityUseCaseTest {
         setting = CourtSetting.OUTDOOR,
         openingHour = opening,
         closingHour = closing,
-        contact = CourtContact(phoneNumber = "000", messengerUrl = null, email = null),
+        contact = CourtContact(phoneNumber = "000", messengerUrl = null),
         logoUrl = null,
         photoUrls = emptyList(),
-        hourlyRate = null,
+        rates = null,
     )
 }

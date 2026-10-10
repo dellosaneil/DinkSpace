@@ -13,7 +13,7 @@ import com.thelazybattley.dinkspace.feature.courts.data.repository.OfflineFirstC
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.AvailabilityRepository
 import com.thelazybattley.dinkspace.feature.courts.domain.repository.CourtRepository
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.ObserveCourtAvailabilityUseCase
-import com.thelazybattley.dinkspace.feature.courts.domain.usecase.ObserveCourtUseCase
+import com.thelazybattley.dinkspace.feature.courts.domain.usecase.ObserveCourtScheduleUseCase
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.RefreshAvailabilityUseCase
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.RefreshCourtsUseCase
 import com.thelazybattley.dinkspace.feature.courts.domain.usecase.SearchCourtsUseCase
@@ -37,10 +37,10 @@ val courtsModule = module {
     singleOf(::InMemoryAvailabilityRepository) bind AvailabilityRepository::class
 
     factoryOf(::SearchCourtsUseCase)
-    factoryOf(::ObserveCourtUseCase)
     factoryOf(::RefreshCourtsUseCase)
     factoryOf(::ObserveCourtAvailabilityUseCase)
     factoryOf(::RefreshAvailabilityUseCase)
+    factoryOf(::ObserveCourtScheduleUseCase)
 
     viewModelOf(::CourtsViewModel)
     viewModelOf(::CourtDetailViewModel)

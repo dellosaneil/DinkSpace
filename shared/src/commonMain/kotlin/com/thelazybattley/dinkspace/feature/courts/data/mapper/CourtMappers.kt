@@ -4,6 +4,7 @@ import com.thelazybattley.dinkspace.feature.courts.data.local.CourtEntity
 import com.thelazybattley.dinkspace.feature.courts.data.remote.CourtDto
 import com.thelazybattley.dinkspace.feature.courts.domain.model.Court
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtContact
+import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtRates
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtSetting
 
 fun CourtDto.toEntity(): CourtEntity = CourtEntity(
@@ -17,10 +18,12 @@ fun CourtDto.toEntity(): CourtEntity = CourtEntity(
     closingHour = closingHour,
     phoneNumber = phoneNumber,
     messengerUrl = messengerUrl?.takeIf { it.isNotBlank() },
-    email = email?.takeIf { it.isNotBlank() },
     logoUrl = logoUrl?.takeIf { it.isNotBlank() },
     photoUrls = photoUrls,
-    hourlyRate = hourlyRate,
+    standardRate = standardRate,
+    peakRate = peakRate,
+    peakStartHour = peakStartHour,
+    peakEndHour = peakEndHour,
 )
 
 fun CourtEntity.toDomain(): Court = Court(
@@ -35,9 +38,15 @@ fun CourtEntity.toDomain(): Court = Court(
     contact = CourtContact(
         phoneNumber = phoneNumber,
         messengerUrl = messengerUrl,
-        email = email,
     ),
     logoUrl = logoUrl,
     photoUrls = photoUrls,
-    hourlyRate = hourlyRate,
+    rates = standardRate?.let { standard ->
+        CourtRates(
+            standardRate = standard,
+            peakRate = peakRate,
+            peakStartHour = peakStartHour,
+            peakEndHour = peakEndHour,
+        )
+    },
 )

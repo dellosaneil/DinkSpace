@@ -15,8 +15,12 @@ data class CourtDto(
     val closingHour: Int = 0,
     val phoneNumber: String = "",
     val messengerUrl: String? = null,
-    val email: String? = null,
     val logoUrl: String? = null,
     val photoUrls: List<String> = emptyList(),
-    val hourlyRate: Double? = null,
+    /** Price per court per hour; leave out when the venue hasn't shared prices. */
+    val standardRate: Double? = null,
+    /** Optional peak price, charged from peakStartHour (inclusive) to peakEndHour (exclusive). */
+    val peakRate: Double? = null,
+    val peakStartHour: Int? = null,
+    val peakEndHour: Int? = null,
 )

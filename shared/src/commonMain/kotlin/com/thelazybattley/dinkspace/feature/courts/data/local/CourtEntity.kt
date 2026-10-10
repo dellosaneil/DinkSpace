@@ -15,8 +15,10 @@ data class CourtEntity(
     val closingHour: Int,
     val phoneNumber: String,
     val messengerUrl: String?,
-    val email: String?,
     val logoUrl: String?,
     val photoUrls: List<String>,
-    val hourlyRate: Double?,
+    val standardRate: Double?,
+    val peakRate: Double?,
+    val peakStartHour: Int?,
+    val peakEndHour: Int?,
 )

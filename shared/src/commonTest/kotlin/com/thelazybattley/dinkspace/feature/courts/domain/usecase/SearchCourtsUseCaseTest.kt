@@ -50,9 +50,9 @@ class SearchCourtsUseCaseTest {
         setting = CourtSetting.OUTDOOR,
         openingHour = 6,
         closingHour = 22,
-        contact = CourtContact(phoneNumber = "000", messengerUrl = null, email = null),
+        contact = CourtContact(phoneNumber = "000", messengerUrl = null),
         logoUrl = null,
         photoUrls = emptyList(),
-        hourlyRate = null,
+        rates = null,
     )
 }

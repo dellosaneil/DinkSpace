@@ -70,3 +70,24 @@ fun DayOfWeek.shortName(): StringResource = when (this) {
     DayOfWeek.SATURDAY -> Res.string.weekday_sat
     DayOfWeek.SUNDAY -> Res.string.weekday_sun
 }
+
+/** Google Maps search for the venue, e.g. https://www.google.com/maps/search/?api=1&query=… */
+fun Court.googleMapsUrl(): String =
+    "https://www.google.com/maps/search/?api=1&query=" + encodeQueryParameter("$name, $address")
+
+/** Percent-encodes [value] as UTF-8 for use in a URL query, keeping RFC 3986 unreserved characters. */
+internal fun encodeQueryParameter(value: String): String = buildString {
+    value.encodeToByteArray().forEach { byte ->
+        val code = byte.toInt() and 0xFF
+        val char = code.toChar()
+        if (char.isLetterOrDigit() && code < 0x80 || char in "-._~") {
+            append(char)
+        } else {
+            append('%')
+            append(HEX[code shr 4])
+            append(HEX[code and 0x0F])
+        }
+    }
+}
+
+private const val HEX = "0123456789ABCDEF"
