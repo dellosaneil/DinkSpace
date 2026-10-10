@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DinkSpace</string>
+
+    <string name="nav_courts">Courts</string>
+    <string name="nav_open_play">Open Play</string>
+    <string name="nav_partners">Partners</string>
+    <string name="nav_record">Record</string>
+
+    <string name="action_back">Back</string>
+    <string name="coming_soon">Coming soon</string>
+
+    <string name="error_no_internet">No internet connection. Showing saved data.</string>
+    <string name="error_unauthorized">You don\'t have access to this data.</string>
+    <string name="error_not_found">We couldn\'t find what you\'re looking for.</string>
+    <string name="error_server">Something went wrong on our side. Try again later.</string>
+    <string name="error_unknown">Something went wrong. Try again.</string>
+    <string name="error_disk_full">Your device is out of storage.</string>
+
+    <string name="courts_title">Find a court</string>
+    <string name="courts_search_hint">Search by name or location</string>
+    <string name="courts_empty">No courts found</string>
+    <string name="court_count">%1$d %2$s courts</string>
+    <string name="court_setting_indoor">indoor</string>
+    <string name="court_setting_outdoor">outdoor</string>
+    <string name="court_view_details">View details &amp; contact</string>
+
+    <string name="court_detail_hours">Open %1$s – %2$s</string>
+    <string name="court_detail_rate">%1$s / hour</string>
+    <string name="court_detail_photos">Photos from the venue</string>
+    <string name="court_detail_contact">Contact to book</string>
+    <string name="court_detail_phone">Phone</string>
+    <string name="court_detail_messenger">Messenger</string>
+    <string name="court_detail_email">Email</string>
+    <string name="court_detail_call_to_book">Call to book</string>
+    <string name="court_detail_not_found">This court is no longer listed.</string>
+</resources>
