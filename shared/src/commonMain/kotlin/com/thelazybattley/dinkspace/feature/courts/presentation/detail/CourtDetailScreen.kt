@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -64,6 +65,7 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
 import com.thelazybattley.dinkspace.feature.courts.presentation.components.DateChips
 import com.thelazybattley.dinkspace.feature.courts.presentation.courtSummary
 import com.thelazybattley.dinkspace.feature.courts.presentation.detail.components.CollapsingCourtHeader
+import com.thelazybattley.dinkspace.feature.courts.presentation.detail.components.PhotoViewer
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHour
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatRate
@@ -92,6 +94,7 @@ import dinkspace.shared.generated.resources.court_detail_open_range
 import dinkspace.shared.generated.resources.court_detail_phone
 import dinkspace.shared.generated.resources.court_detail_photo_count
 import dinkspace.shared.generated.resources.court_detail_rates_note
+import dinkspace.shared.generated.resources.court_detail_view_photo
 import dinkspace.shared.generated.resources.court_setting_indoor_label
 import dinkspace.shared.generated.resources.court_setting_outdoor_label
 import dinkspace.shared.generated.resources.ic_call
@@ -222,14 +225,28 @@ private fun CourtPhotos(
     modifier: Modifier = Modifier,
 ) {
     var selected by rememberSaveable { mutableIntStateOf(0) }
+    var isViewerOpen by rememberSaveable { mutableStateOf(false) }
     val index = selected.coerceIn(0, photoUrls.lastIndex)
+
+    if (isViewerOpen) {
+        PhotoViewer(
+            photoUrls = photoUrls,
+            initialIndex = index,
+            contentDescription = courtName,
+            onDismiss = { lastIndex ->
+                selected = lastIndex
+                isViewerOpen = false
+            },
+        )
+    }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(196.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable(onClickLabel = stringResource(Res.string.court_detail_view_photo)) { isViewerOpen = true },
         ) {
             AsyncImage(
                 model = photoUrls[index],

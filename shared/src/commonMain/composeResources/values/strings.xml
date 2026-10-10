@@ -8,6 +8,7 @@
     <string name="nav_record">Record</string>
 
     <string name="action_back">Back</string>
+    <string name="action_close">Close</string>
     <string name="coming_soon">Coming soon</string>
 
     <string name="error_no_internet">No internet connection. Showing saved data.</string>
@@ -58,6 +59,7 @@
     <string name="court_detail_maps_chip">Maps ↗</string>
     <string name="court_detail_call">Call</string>
     <string name="court_detail_message">Message</string>
+    <string name="court_detail_view_photo">View photo full screen</string>
     <string name="court_detail_photo_count">%1$d / %2$d</string>
     <string name="court_detail_availability">Availability &amp; rates</string>
     <string name="court_detail_col_time">Time</string>
