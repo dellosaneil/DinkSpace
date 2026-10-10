@@ -33,24 +33,18 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHour
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
+import com.thelazybattley.dinkspace.feature.courts.presentation.shortName
+import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.CourtFilterMode
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.TimeRangeSelection
 import dinkspace.shared.generated.resources.Res
 import dinkspace.shared.generated.resources.courts_filter_date_time
 import dinkspace.shared.generated.resources.courts_filter_name
+import dinkspace.shared.generated.resources.courts_time_ends_next_day
 import dinkspace.shared.generated.resources.courts_time_hint_end
 import dinkspace.shared.generated.resources.courts_time_hint_start
 import dinkspace.shared.generated.resources.date_today
-import dinkspace.shared.generated.resources.weekday_fri
-import dinkspace.shared.generated.resources.weekday_mon
-import dinkspace.shared.generated.resources.weekday_sat
-import dinkspace.shared.generated.resources.weekday_sun
-import dinkspace.shared.generated.resources.weekday_thu
-import dinkspace.shared.generated.resources.weekday_tue
-import dinkspace.shared.generated.resources.weekday_wed
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -114,13 +108,14 @@ fun DateChips(
 @Composable
 fun TimeRangePicker(
     selection: TimeRangeSelection,
+    selectedDate: LocalDate,
     onHourClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val hours = TimeRangeSelection.selectableHours.toList()
     // Open with the selected start in view, one chip of context to its left.
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = (selection.range.startHour - TimeRangeSelection.FIRST_HOUR - 1).coerceAtLeast(0),
+        initialFirstVisibleItemIndex = (selection.range.startHour - 1).coerceAtLeast(0),
     )
     val rangeLabel = formatHourRange(selection.range.startHour, selection.range.endHour)
 
@@ -130,7 +125,17 @@ fun TimeRangePicker(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = rangeLabel, style = MaterialTheme.typography.titleMedium)
+            Column {
+                Text(text = rangeLabel, style = MaterialTheme.typography.titleMedium)
+                if (selection.range.crossesMidnight) {
+                    val endDate = selection.range.datesFrom(selectedDate).last()
+                    Text(
+                        text = stringResource(Res.string.courts_time_ends_next_day, endDate.shortLabel()),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
             Text(
                 text = stringResource(
                     if (selection.isPickingEnd) Res.string.courts_time_hint_end else Res.string.courts_time_hint_start,
@@ -222,14 +227,4 @@ private fun SelectableTile(
             )
         }
     }
-}
-
-private fun DayOfWeek.shortName(): StringResource = when (this) {
-    DayOfWeek.MONDAY -> Res.string.weekday_mon
-    DayOfWeek.TUESDAY -> Res.string.weekday_tue
-    DayOfWeek.WEDNESDAY -> Res.string.weekday_wed
-    DayOfWeek.THURSDAY -> Res.string.weekday_thu
-    DayOfWeek.FRIDAY -> Res.string.weekday_fri
-    DayOfWeek.SATURDAY -> Res.string.weekday_sat
-    DayOfWeek.SUNDAY -> Res.string.weekday_sun
 }

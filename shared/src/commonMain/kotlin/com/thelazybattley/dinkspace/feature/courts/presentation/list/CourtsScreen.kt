@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +40,7 @@ import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtAvailabilityCard
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtCard
+import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.CourtListSkeleton
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.DateChips
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.FilterModeTabs
 import com.thelazybattley.dinkspace.feature.courts.presentation.list.components.TimeRangePicker
@@ -144,6 +144,7 @@ private fun CourtsHeader(
                 )
                 TimeRangePicker(
                     selection = state.timeSelection,
+                    selectedDate = state.selectedDate,
                     onHourClick = { onAction(CourtsAction.OnHourClick(it)) },
                 )
             }
@@ -169,7 +170,7 @@ private fun AvailabilityList(
     onAction: (CourtsAction) -> Unit,
 ) {
     when {
-        state.isLoadingAvailability -> CenteredBox { CircularProgressIndicator() }
+        state.isLoadingAvailability -> CourtListSkeleton(showSlots = true)
         state.availability.isEmpty() -> CenteredBox { EmptyCourts() }
         else -> CourtList {
             items(state.availability, key = { it.court.id }) { availability ->
@@ -188,7 +189,7 @@ private fun NameResultsList(
     onAction: (CourtsAction) -> Unit,
 ) {
     when {
-        state.isLoading -> CenteredBox { CircularProgressIndicator() }
+        state.isLoading -> CourtListSkeleton(showSlots = false)
         state.courts.isEmpty() -> CenteredBox { EmptyCourts() }
         else -> CourtList {
             items(state.courts, key = { it.id }) { court ->
@@ -255,8 +256,8 @@ private fun CourtsScreenPreview() {
                     CourtAvailability(
                         court = court,
                         slots = listOf(
-                            HourSlot(16, SlotStatus.OPEN, freeCourts = 3),
-                            HourSlot(17, SlotStatus.BOOKED, freeCourts = 0),
+                            HourSlot(today, 16, SlotStatus.OPEN, freeCourts = 3),
+                            HourSlot(today, 17, SlotStatus.BOOKED, freeCourts = 0),
                         ),
                     ),
                 ),

@@ -22,7 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -145,7 +144,7 @@ fun CourtDetailScreen(
         ) {
             val court = state.court
             when {
-                state.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                state.isLoading -> CourtDetailSkeleton()
                 court == null -> Text(
                     text = stringResource(Res.string.court_detail_not_found),
                     modifier = Modifier.align(Alignment.Center).padding(32.dp),

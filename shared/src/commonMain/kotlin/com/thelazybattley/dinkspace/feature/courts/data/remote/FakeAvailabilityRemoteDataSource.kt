@@ -18,7 +18,7 @@ class FakeAvailabilityRemoteDataSource : AvailabilityRemoteDataSource {
                 AvailabilityDto(
                     courtId = court.id,
                     date = date.toString(),
-                    freeCourtsByHour = (court.openingHour until court.closingHour).associate { hour ->
+                    freeCourtsByHour = (0 until HOURS_PER_DAY).associate { hour ->
                         hour.toString() to freeCourts(court, date, hour)
                     },
                 )
@@ -42,5 +42,6 @@ class FakeAvailabilityRemoteDataSource : AvailabilityRemoteDataSource {
 
     private companion object {
         const val FAKE_LATENCY_MS = 400L
+        const val HOURS_PER_DAY = 24
     }
 }

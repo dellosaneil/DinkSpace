@@ -91,7 +91,8 @@ object DummyCourts {
             courtCount = 10,
             setting = "indoor",
             openingHour = 5,
-            closingHour = 24,
+            // Open past midnight, until 2 AM.
+            closingHour = 26,
             phoneNumber = "+1 (555) 016-2087",
             email = "play@summitathletic.example",
             photoUrls = photos("summit", 2),

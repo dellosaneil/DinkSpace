@@ -6,6 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -22,12 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.thelazybattley.dinkspace.feature.courts.domain.model.Court
 import com.thelazybattley.dinkspace.feature.courts.domain.model.CourtAvailability
 import com.thelazybattley.dinkspace.feature.courts.domain.model.HourSlot
 import com.thelazybattley.dinkspace.feature.courts.domain.model.SlotStatus
 import com.thelazybattley.dinkspace.feature.courts.presentation.courtSummary
 import com.thelazybattley.dinkspace.feature.courts.presentation.formatHourRange
+import com.thelazybattley.dinkspace.feature.courts.presentation.shortLabel
 import dinkspace.shared.generated.resources.Res
 import dinkspace.shared.generated.resources.court_view_details
 import dinkspace.shared.generated.resources.courts_closed
@@ -63,7 +70,24 @@ fun CourtAvailabilityCard(
         modifier = modifier,
         badge = { AvailabilityBadge(availability) },
     ) {
-        SlotGrid(availability.slots)
+        val slotsByDate = availability.slots.groupBy { it.date }
+        if (slotsByDate.size == 1) {
+            SlotGrid(availability.slots)
+        } else {
+            // The range runs past midnight: label each day's hours.
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                slotsByDate.forEach { (date, slots) ->
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = date.shortLabel(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        SlotGrid(slots)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -148,8 +172,11 @@ private fun AvailabilityBadge(availability: CourtAvailability) {
 private fun SlotGrid(slots: List<HourSlot>) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         slots.chunked(SLOT_COLUMNS).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                row.forEach { slot -> SlotTile(slot, Modifier.weight(1f)) }
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                row.forEach { slot -> SlotTile(slot, Modifier.weight(1f).fillMaxHeight()) }
                 repeat(SLOT_COLUMNS - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
@@ -175,10 +202,12 @@ private fun SlotTile(slot: HourSlot, modifier: Modifier = Modifier) {
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(
+        // Shrinks long labels like "11 PM–12 AM" so every tile stays one line tall.
+        BasicText(
             text = formatHourRange(slot.startHour, slot.startHour + 1),
-            style = MaterialTheme.typography.labelLarge,
-            color = timeColor,
+            style = MaterialTheme.typography.labelLarge.copy(color = timeColor),
+            maxLines = 1,
+            autoSize = TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = MaterialTheme.typography.labelLarge.fontSize),
         )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             StatusDot(filled = isOpen, color = if (isOpen) colors.primary else colors.onSurfaceVariant)

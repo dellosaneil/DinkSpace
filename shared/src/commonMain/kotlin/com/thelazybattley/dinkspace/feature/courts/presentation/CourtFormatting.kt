@@ -7,6 +7,16 @@ import dinkspace.shared.generated.resources.Res
 import dinkspace.shared.generated.resources.court_count
 import dinkspace.shared.generated.resources.court_setting_indoor
 import dinkspace.shared.generated.resources.court_setting_outdoor
+import dinkspace.shared.generated.resources.weekday_fri
+import dinkspace.shared.generated.resources.weekday_mon
+import dinkspace.shared.generated.resources.weekday_sat
+import dinkspace.shared.generated.resources.weekday_sun
+import dinkspace.shared.generated.resources.weekday_thu
+import dinkspace.shared.generated.resources.weekday_tue
+import dinkspace.shared.generated.resources.weekday_wed
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** "6 outdoor courts" */
@@ -46,3 +56,17 @@ fun formatRate(rate: Double): String {
 
 /** "https://m.me/venue" -> "m.me/venue" */
 fun String.withoutScheme(): String = substringAfter("://")
+
+/** "Sun 11" */
+@Composable
+fun LocalDate.shortLabel(): String = "${stringResource(dayOfWeek.shortName())} $day"
+
+fun DayOfWeek.shortName(): StringResource = when (this) {
+    DayOfWeek.MONDAY -> Res.string.weekday_mon
+    DayOfWeek.TUESDAY -> Res.string.weekday_tue
+    DayOfWeek.WEDNESDAY -> Res.string.weekday_wed
+    DayOfWeek.THURSDAY -> Res.string.weekday_thu
+    DayOfWeek.FRIDAY -> Res.string.weekday_fri
+    DayOfWeek.SATURDAY -> Res.string.weekday_sat
+    DayOfWeek.SUNDAY -> Res.string.weekday_sun
+}

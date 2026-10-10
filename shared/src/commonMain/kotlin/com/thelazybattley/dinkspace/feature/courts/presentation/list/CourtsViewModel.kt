@@ -37,6 +37,7 @@ class CourtsViewModel(
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
+    private val loadedDates = mutableSetOf<LocalDate>()
 
     private val _state = MutableStateFlow(initialState(dateProvider.today()))
     val state: StateFlow<CourtsState> = _state
@@ -92,12 +93,22 @@ class CourtsViewModel(
             }
             .launchIn(viewModelScope)
 
-        // Refetch whenever the day changes; a cached day still shows instantly meanwhile.
+        // Load each day the range touches the first time it's needed; pull to refresh refetches.
         _state
-            .map { it.selectedDate }
+            .map { it.timeSelection.range.datesFrom(it.selectedDate) }
             .distinctUntilChanged()
-            .onEach { date -> viewModelScope.launch { refreshAvailability(date).onFailure(::showError) } }
+            .onEach { dates -> dates.filter { it !in loadedDates }.forEach(::loadAvailability) }
             .launchIn(viewModelScope)
+    }
+
+    private fun loadAvailability(date: LocalDate) {
+        loadedDates += date
+        viewModelScope.launch {
+            refreshAvailability(date).onFailure { error ->
+                loadedDates -= date
+                showError(error)
+            }
+        }
     }
 
     private fun refreshAll() {
@@ -105,7 +116,10 @@ class CourtsViewModel(
             _state.update { it.copy(isRefreshing = true) }
             coroutineScope {
                 launch { refreshCourts().onFailure(::showError) }
-                launch { refreshAvailability(_state.value.selectedDate).onFailure(::showError) }
+                val current = _state.value
+                current.timeSelection.range.datesFrom(current.selectedDate).forEach { date ->
+                    launch { refreshAvailability(date).onFailure(::showError) }
+                }
             }
             _state.update { it.copy(isRefreshing = false) }
         }

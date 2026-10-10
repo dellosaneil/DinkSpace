@@ -13,7 +13,14 @@ data class Court(
     val logoUrl: String?,
     val photoUrls: List<String>,
     val hourlyRate: Double?,
-)
+) {
+    /**
+     * Whether the venue is open during the hour starting at [hourOfDay] (0–23).
+     * [closingHour] may exceed 24 for venues open past midnight (26 = 2 AM).
+     */
+    fun isOpenAt(hourOfDay: Int): Boolean =
+        hourOfDay in openingHour until closingHour || hourOfDay + 24 < closingHour
+}
 
 enum class CourtSetting { INDOOR, OUTDOOR }
 

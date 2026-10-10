@@ -29,6 +29,7 @@
     <string name="courts_time_range">Time range</string>
     <string name="courts_time_hint_start">Tap a start, then an end</string>
     <string name="courts_time_hint_end">Now tap an end time</string>
+    <string name="courts_time_ends_next_day">Ends %1$s</string>
     <string name="courts_open_slots">%1$d open</string>
     <string name="courts_fully_booked">Fully booked</string>
     <string name="courts_closed">Closed</string>

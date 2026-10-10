@@ -1,33 +1,37 @@
 package com.thelazybattley.dinkspace.feature.courts.presentation.list
 
 import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange
+import com.thelazybattley.dinkspace.feature.courts.domain.model.TimeRange.Companion.HOURS_PER_DAY
 
 /**
- * Two-tap range picker: the first tap sets the start (and a one-hour range),
- * the second tap sets the end. Tapping at or before the start restarts the selection.
+ * Two-tap range picker over a 24-hour strip. The first tap sets the start (and a one-hour range),
+ * the second sets the end. An end earlier than the start wraps into the next day, so
+ * 12 PM then 1 AM selects 12 PM to 1 AM the next day. Tapping the start again restarts there.
  */
 data class TimeRangeSelection(
     val range: TimeRange = TimeRange(startHour = 16, endHour = 18),
     val isPickingEnd: Boolean = false,
 ) {
     fun onHourClick(hour: Int): TimeRangeSelection {
-        val clamped = hour.coerceIn(FIRST_HOUR, LAST_HOUR)
-        return if (!isPickingEnd || clamped <= range.startHour) {
-            val start = clamped.coerceAtMost(LAST_HOUR - 1)
-            TimeRangeSelection(TimeRange(start, start + 1), isPickingEnd = true)
+        val tapped = hour.mod(HOURS_PER_DAY)
+        val start = range.startHour
+        return if (!isPickingEnd || tapped == start) {
+            TimeRangeSelection(TimeRange(tapped, tapped + 1), isPickingEnd = true)
         } else {
-            TimeRangeSelection(TimeRange(range.startHour, clamped), isPickingEnd = false)
+            val end = if (tapped > start) tapped else tapped + HOURS_PER_DAY
+            TimeRangeSelection(TimeRange(start, end), isPickingEnd = false)
         }
     }
 
     /** The two ends of the range get the strong highlight; while picking the end only the start does. */
-    fun isEdge(hour: Int): Boolean = hour == range.startHour || (!isPickingEnd && hour == range.endHour)
+    fun isEdge(hour: Int): Boolean =
+        hour == range.startHour || (!isPickingEnd && hour == range.endHour % HOURS_PER_DAY)
 
-    fun isBetween(hour: Int): Boolean = !isPickingEnd && hour > range.startHour && hour < range.endHour
+    /** Hours strictly inside the range, wrapping past midnight. */
+    fun isBetween(hour: Int): Boolean =
+        !isPickingEnd && ((range.startHour + 1) until range.endHour).any { it % HOURS_PER_DAY == hour } && !isEdge(hour)
 
     companion object {
-        const val FIRST_HOUR = 6
-        const val LAST_HOUR = 22
-        val selectableHours: IntRange = FIRST_HOUR..LAST_HOUR
+        val selectableHours: IntRange = 0 until HOURS_PER_DAY
     }
 }
